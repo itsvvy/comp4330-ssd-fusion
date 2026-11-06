@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 import torch
 
+from layers.modules import MultiBoxLoss
 from ssd import build_ssd
 
 
@@ -81,3 +82,35 @@ def test_baseline_checkpoint_only_allows_new_branch_keys(tmp_path: Path):
     assert all(
         key.startswith("fusion.") for key in incompatible.missing_keys
     )
+
+
+def test_multibox_loss_backward_is_finite():
+    model = build_ssd("train", variant="fusion")
+    images = torch.randn(2, 3, 300, 300)
+    targets = [
+        torch.tensor(
+            [[0.1, 0.1, 0.5, 0.5, 4], [0.5, 0.5, 0.9, 0.9, 14]],
+            dtype=torch.float32,
+        ),
+        torch.tensor(
+            [[0.2, 0.3, 0.4, 0.7, 6]],
+            dtype=torch.float32,
+        ),
+    ]
+    criterion = MultiBoxLoss(
+        21,
+        0.5,
+        True,
+        0,
+        True,
+        3,
+        0.5,
+        False,
+        use_gpu=False,
+    )
+    predictions = model(images)
+    loss_loc, loss_conf = criterion(predictions, targets)
+    (loss_loc + loss_conf).backward()
+    assert torch.isfinite(loss_loc)
+    assert torch.isfinite(loss_conf)
+    assert model.fusion.scale.grad is not None
