@@ -97,7 +97,7 @@ class VOCDetection(data.Dataset):
     def __init__(self, root,
                  image_sets=[('2007', 'trainval'), ('2012', 'trainval')],
                  transform=None, target_transform=VOCAnnotationTransform(),
-                 dataset_name='VOC0712'):
+                 dataset_name='VOC0712', filter_empty=False):
         self.root = root
         self.image_set = image_sets
         self.transform = transform
@@ -109,7 +109,17 @@ class VOCDetection(data.Dataset):
         for (year, name) in image_sets:
             rootpath = osp.join(self.root, 'VOC' + year)
             for line in open(osp.join(rootpath, 'ImageSets', 'Main', name + '.txt')):
-                self.ids.append((rootpath, line.strip()))
+                image_id = line.strip()
+                if filter_empty:
+                    annotation = ET.parse(
+                        self._annopath % (rootpath, image_id)
+                    ).getroot()
+                    if not any(
+                        int(item.find('difficult').text) == 0
+                        for item in annotation.findall('object')
+                    ):
+                        continue
+                self.ids.append((rootpath, image_id))
 
     def __getitem__(self, index):
         im, gt, h, w = self.pull_item(index)

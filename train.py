@@ -186,6 +186,7 @@ def train(args) -> None:
     dataset = VOCDetection(
         root=args.dataset_root,
         transform=SSDAugmentation(voc["min_dim"], MEANS),
+        filter_empty=True,
     )
     print(f"training images: {len(dataset)}")
 
