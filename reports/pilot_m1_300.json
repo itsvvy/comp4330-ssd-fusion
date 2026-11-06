@@ -1,0 +1,31 @@
+{
+  "configuration": "M1",
+  "purpose": "training stability pilot; not a VOC2007 accuracy result",
+  "iterations": 300,
+  "batch_size": 8,
+  "gradient_accumulation": 2,
+  "mixed_precision": true,
+  "elapsed_seconds": 99.397,
+  "iterations_per_second_including_startup": 3.018,
+  "sample_log": {
+    "iter_100": {
+      "loss_loc": 1.3093,
+      "loss_conf": 2.9259
+    },
+    "iter_200": {
+      "loss_loc": 1.0546,
+      "loss_conf": 2.7151
+    },
+    "iter_300": {
+      "loss_loc": 1.2540,
+      "loss_conf": 3.0463
+    }
+  },
+  "status": "completed without NaN or OOM",
+  "runtime": {
+    "gpu": "Tesla T4",
+    "python": "3.13.16",
+    "pytorch": "2.11.0+cu130",
+    "cuda": "13.0"
+  }
+}
