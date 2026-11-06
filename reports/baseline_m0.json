@@ -1,0 +1,41 @@
+{
+  "configuration": "M0",
+  "checkpoint": "ssd300_mAP_77.43_v2.pth",
+  "dataset": "VOC2007 test",
+  "image_count": 4952,
+  "overall_map_0.5": 0.7766115029559962,
+  "overall_map_at_0.5_note": "Recomputed from saved detections with the VOC07 11-point evaluator.",
+  "input_space_overall_ap_0.5": 0.7768843963285864,
+  "input_space_overall_recall_0.5": 0.9237865691489362,
+  "size_bins": {
+    "small": {
+      "area": "< 32^2",
+      "gt_count": 1377,
+      "ap_0.5": 0.10778111705367524,
+      "recall_0.5": 0.7705156136528686
+    },
+    "medium": {
+      "area": "32^2 <= area < 96^2",
+      "gt_count": 4590,
+      "ap_0.5": 0.6307355072233501,
+      "recall_0.5": 0.9159041394335512
+    },
+    "large": {
+      "area": ">= 96^2",
+      "gt_count": 6065,
+      "ap_0.5": 0.859683318196289,
+      "recall_0.5": 0.964550700741962
+    }
+  },
+  "latency_ms_mean": 52.45296355957067,
+  "fps": 19.064699725961205,
+  "runtime": {
+    "gpu": "Tesla T4",
+    "gpu_memory_gib": 14.6,
+    "system_memory_gib": 12.67,
+    "cpu_cores": 2,
+    "python": "3.13.16",
+    "pytorch": "2.11.0+cu130",
+    "cuda": "13.0"
+  }
+}

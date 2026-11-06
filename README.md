@@ -34,6 +34,11 @@ The compatibility path has been exercised in Colab with Python 3.13.16,
 PyTorch 2.11.0, CUDA 13.0, and a 15 GB Tesla T4. The tests also run on CPU
 PyTorch for development machines without CUDA.
 
+The first baseline run and training profile are summarized under `reports/`.
+They reproduce 77.66% overall VOC2007 mAP@0.5 and expose a large input-space
+small-object gap; these are preliminary course-project results, not the final
+fusion comparison.
+
 ## Local setup
 
 On Windows, use WSL2 Ubuntu 22.04. Keep the repository and environments in the

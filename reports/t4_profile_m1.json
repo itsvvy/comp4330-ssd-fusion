@@ -1,0 +1,24 @@
+{
+  "configuration": "M1",
+  "purpose": "compatibility and throughput profile, not a final accuracy result",
+  "iterations": 35,
+  "first_profile_iterations": 30,
+  "resume_validation_iterations": 5,
+  "batch_size": 8,
+  "gradient_accumulation": 2,
+  "mixed_precision": true,
+  "stable_iterations_per_second": 3.71,
+  "first_iteration_seconds": 9.42,
+  "steady_step_seconds_approx": 0.23,
+  "peak_cuda_allocated_gib": 0.6272034645080566,
+  "estimated_10k_minutes": 45,
+  "resume_checkpoint_iteration": 35,
+  "fusion_scale_after_resume": -0.00006780073454137892,
+  "runtime": {
+    "gpu": "Tesla T4",
+    "gpu_memory_gib": 14.6,
+    "python": "3.13.16",
+    "pytorch": "2.11.0+cu130",
+    "cuda": "13.0"
+  }
+}
