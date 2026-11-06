@@ -90,9 +90,10 @@ python scripts/run_experiment.py \
   --resume /path/to/last.pt
 ```
 
-Checkpoints contain model, optimizer, scheduler, iteration, AMP scaler, seed,
-and RNG state. A resumed Colab session should lose at most the interval since
-the latest checkpoint.
+Checkpoints contain the model, optimizer, iteration, AMP scaler, seed, RNG
+state, and every schedule argument needed to reconstruct the learning rate.
+A resumed Colab session should lose at most the interval since the latest
+checkpoint.
 
 ## Evaluation
 
