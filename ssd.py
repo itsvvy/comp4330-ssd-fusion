@@ -181,7 +181,7 @@ class SSD(nn.Module):
 
     def load_weights(self, base_file):
         checkpoint = torch.load(
-            base_file, map_location="cpu", weights_only=True
+            base_file, map_location="cpu", weights_only=False
         )
         if isinstance(checkpoint, dict) and "model" in checkpoint:
             checkpoint = checkpoint["model"]
