@@ -1,0 +1,6 @@
+extends: base.yaml
+name: m1_fusion
+model_variant: fusion
+fusion_enabled: true
+fusion_channels: 512
+fusion_scale_init: 0.0

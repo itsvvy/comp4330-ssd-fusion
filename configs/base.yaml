@@ -1,0 +1,20 @@
+seed: 1337
+dataset: VOC
+dataset_root: /content/data/VOCdevkit
+input_size: 300
+num_classes: 21
+batch_size: 8
+grad_accum_steps: 2
+num_workers: 2
+max_iter: 10000
+freeze_iter: 4000
+learning_rate: 0.001
+unfreeze_learning_rate: 0.0001
+momentum: 0.9
+weight_decay: 0.0005
+lr_steps: [6000, 8500, 9500]
+checkpoint_every: 500
+amp: true
+init_checkpoint: /content/weights/ssd300_mAP_77.43_v2.pth
+save_root: /content/drive/MyDrive/COMP4330/runs
+

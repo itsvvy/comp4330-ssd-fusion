@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comp4330-ssd-fusion"
+version = "0.1.0"
+description = "Size-stratified SSD300 evaluation with lightweight cross-scale fusion"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+

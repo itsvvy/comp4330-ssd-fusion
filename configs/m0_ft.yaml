@@ -1,0 +1,5 @@
+extends: base.yaml
+name: m0_ft
+model_variant: baseline
+fusion_enabled: false
+

@@ -1,0 +1,6 @@
+extends: base.yaml
+name: control
+model_variant: control
+fusion_enabled: false
+control_channels: 766
+

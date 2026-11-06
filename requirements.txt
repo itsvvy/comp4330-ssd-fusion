@@ -1,0 +1,6 @@
+numpy>=1.26,<3
+opencv-python-headless>=4.9,<5
+PyYAML>=6.0,<7
+tqdm>=4.66,<5
+pytest>=8.0,<10
+
