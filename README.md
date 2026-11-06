@@ -108,6 +108,28 @@ The primary size result is class-aware pooled AP; per-class AP and macro mAP
 are reported as secondary results. VOC2007 test must not be used to tune the
 model or select an iteration.
 
+Save all VOC2007 detections:
+
+```bash
+python eval.py \
+  --trained_model /path/to/ssd300_mAP_77.43_v2.pth \
+  --voc_root /content/data/VOCdevkit \
+  --save_folder /path/to/run/eval \
+  --variant baseline
+```
+
+Then compute overall and size-stratified metrics:
+
+```bash
+python tools/size_stratified_eval.py \
+  --detections /path/to/run/eval/detections.pkl \
+  --voc-root /content/data/VOCdevkit \
+  --output /path/to/run/eval/metrics.json
+```
+
+Use `--limit 5` on `eval.py` for a quick end-to-end smoke test. Do not use a
+limited result as a project metric.
+
 ## Repository layout
 
 ```text

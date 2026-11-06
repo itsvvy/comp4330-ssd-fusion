@@ -196,6 +196,25 @@ def train(args) -> None:
         variant=args.fusion_mode,
         control_channels=args.control_channels,
     ).to(device)
+    model_info = {
+        "variant": args.fusion_mode,
+        "total_parameters": sum(
+            parameter.numel() for parameter in model.parameters()
+        ),
+        "trainable_parameters": sum(
+            parameter.numel()
+            for parameter in model.parameters()
+            if parameter.requires_grad
+        ),
+        "control_channels": (
+            args.control_channels
+            if args.fusion_mode == "control"
+            else None
+        ),
+    }
+    (save_folder / "model_info.json").write_text(
+        json.dumps(model_info, indent=2) + "\n", encoding="utf-8"
+    )
 
     frozen = args.freeze_iter > 0
     set_backbone_trainable(model, not frozen)
