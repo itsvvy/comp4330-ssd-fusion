@@ -103,7 +103,7 @@ def class_ap(
         candidates = [
             index
             for index, item in enumerate(gt_by_image[image_id])
-            if item["name"] == class_name and not item["difficult"]
+            if item["name"] == class_name
         ]
         best_iou = 0.0
         best_index = -1
@@ -129,6 +129,8 @@ def class_ap(
                 best_iou = iou
                 best_index = index
         if best_iou >= iou_threshold and best_index >= 0:
+            if gt_by_image[image_id][best_index]["difficult"]:
+                continue
             if not used[image_id][best_index]:
                 true_positive[detection_index] = 1.0
                 used[image_id][best_index] = True
