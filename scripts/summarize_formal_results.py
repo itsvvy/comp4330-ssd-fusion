@@ -9,6 +9,11 @@ from pathlib import Path
 
 
 ARMS = ("m0_ft", "control", "m1_fusion")
+ARM_LABELS = {
+    "m0_ft": "M0-FT",
+    "control": "C",
+    "m1_fusion": "M1",
+}
 
 
 def latest_directory(root: Path, arm: str) -> Path:
@@ -53,17 +58,63 @@ def markdown(summary: dict) -> str:
     lines = [
         "# Formal 6k Results",
         "",
-        "| Arm | mAP@0.5 | small AP | medium AP | large AP |",
-        "|---|---:|---:|---:|---:|",
+        "All arms use the same 6,000-iteration budget and seed. The differences",
+        "below are descriptive single-seed course-project results, not evidence",
+        "of statistical significance.",
+        "",
+        "| Arm | Overall mAP@0.5 | Small AP | Medium AP | Large AP | FPS |",
+        "|---|---:|---:|---:|---:|---:|",
     ]
     for arm in ARMS:
         item = summary[arm]
         bins = item["size_bins"]
         lines.append(
-            f"| {arm} | {item['overall_map_0.5']:.4f} | "
+            f"| {ARM_LABELS[arm]} | {item['overall_map_0.5']:.4f} | "
             f"{bins['small']['ap']:.4f} | "
             f"{bins['medium']['ap']:.4f} | "
-            f"{bins['large']['ap']:.4f} |"
+            f"{bins['large']['ap']:.4f} | {item['fps']:.2f} |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Arm | Small recall | Medium recall | Large recall | Parameters |",
+            "|---|---:|---:|---:|---:|",
+        ]
+    )
+    for arm in ARMS:
+        item = summary[arm]
+        bins = item["size_bins"]
+        lines.append(
+            f"| {ARM_LABELS[arm]} | "
+            f"{bins['small']['recall']:.4f} | "
+            f"{bins['medium']['recall']:.4f} | "
+            f"{bins['large']['recall']:.4f} | "
+            f"{item['model']['total_parameters']:,} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "| Comparison | Δ overall mAP | Δ small AP | Δ medium AP | Δ large AP |",
+            "|---|---:|---:|---:|---:|",
+        ]
+    )
+    comparisons = (
+        ("C - M0-FT", "control", "m0_ft"),
+        ("M1 - M0-FT", "m1_fusion", "m0_ft"),
+        ("M1 - C", "m1_fusion", "control"),
+    )
+    for label, candidate, reference in comparisons:
+        candidate_item = summary[candidate]
+        reference_item = summary[reference]
+        candidate_bins = candidate_item["size_bins"]
+        reference_bins = reference_item["size_bins"]
+        lines.append(
+            f"| {label} | "
+            f"{candidate_item['overall_map_0.5'] - reference_item['overall_map_0.5']:+.4f} | "
+            f"{candidate_bins['small']['ap'] - reference_bins['small']['ap']:+.4f} | "
+            f"{candidate_bins['medium']['ap'] - reference_bins['medium']['ap']:+.4f} | "
+            f"{candidate_bins['large']['ap'] - reference_bins['large']['ap']:+.4f} |"
         )
     lines.extend(
         [
