@@ -14,6 +14,11 @@ AMP fit comfortably on the available T4.
 `pilot_m1_300.json` records the longer 300-iteration stability pilot. It also
 completed without OOM or non-finite loss, but it is not used to select a model.
 
+`formal_6k_results.json` and `formal_6k_results.md` contain the final formal
+M0-FT, parameter-matched control C, and fusion M1 results. All three arms use
+the same 6,000-iteration protocol and one seed. The final test differences are
+very small; the Markdown report states the limitations explicitly.
+
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
 artifact store.

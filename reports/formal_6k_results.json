@@ -1,0 +1,103 @@
+{
+  "protocol": {
+    "dataset": "VOC0712 trainval",
+    "evaluation_split": "VOC2007 test",
+    "images": 4952,
+    "iterations": 6000,
+    "freeze_iterations": 2400,
+    "seed": 1337,
+    "batch_size": 8,
+    "gradient_accumulation": 2,
+    "amp": true,
+    "learning_rate_steps": [
+      3600,
+      5100,
+      5700
+    ],
+    "run_timestamp": "20261109T171953Z",
+    "init_checkpoint": "ssd300_mAP_77.43_v2.pth"
+  },
+  "arms": {
+    "m0_ft": {
+      "variant": "baseline",
+      "total_parameters": 26285486,
+      "overall_map_0.5": 0.7725720172749051,
+      "latency_ms_mean": 42.44131356361202,
+      "fps": 23.561947452478748,
+      "size_bins": {
+        "small": {
+          "ap": 0.11108531777562503,
+          "recall": 0.7625272331154684,
+          "gt_count": 1377,
+          "ignored_detections": 13457
+        },
+        "medium": {
+          "ap": 0.6294735930251288,
+          "recall": 0.9119825708061002,
+          "gt_count": 4590,
+          "ignored_detections": 9541
+        },
+        "large": {
+          "ap": 0.8589707225294053,
+          "recall": 0.9643858202802967,
+          "gt_count": 6065,
+          "ignored_detections": 8304
+        }
+      }
+    },
+    "control": {
+      "variant": "control",
+      "total_parameters": 27076765,
+      "overall_map_0.5": 0.7726707730811041,
+      "latency_ms_mean": 43.808711360464116,
+      "fps": 22.82651027490542,
+      "size_bins": {
+        "small": {
+          "ap": 0.11096737960355925,
+          "recall": 0.7632534495279594,
+          "gt_count": 1377,
+          "ignored_detections": 13451
+        },
+        "medium": {
+          "ap": 0.6291101411607026,
+          "recall": 0.9117647058823529,
+          "gt_count": 4590,
+          "ignored_detections": 9536
+        },
+        "large": {
+          "ap": 0.8586868678809082,
+          "recall": 0.9650453421269579,
+          "gt_count": 6065,
+          "ignored_detections": 8298
+        }
+      }
+    },
+    "m1_fusion": {
+      "variant": "fusion",
+      "total_parameters": 27076527,
+      "overall_map_0.5": 0.7726425703711877,
+      "latency_ms_mean": 42.828744224354644,
+      "fps": 23.34880506329084,
+      "size_bins": {
+        "small": {
+          "ap": 0.11069647127757172,
+          "recall": 0.7639796659404503,
+          "gt_count": 1377,
+          "ignored_detections": 13473
+        },
+        "medium": {
+          "ap": 0.6291737021129622,
+          "recall": 0.9115468409586057,
+          "gt_count": 4590,
+          "ignored_detections": 9546
+        },
+        "large": {
+          "ap": 0.8593263770785939,
+          "recall": 0.9643858202802967,
+          "gt_count": 6065,
+          "ignored_detections": 8308
+        }
+      }
+    }
+  }
+}
