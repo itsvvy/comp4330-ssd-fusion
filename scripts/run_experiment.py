@@ -39,6 +39,7 @@ def main() -> None:
     parser.add_argument("--dataset-root")
     parser.add_argument("--init-checkpoint")
     parser.add_argument("--save-root")
+    parser.add_argument("--run-dir", type=Path)
     parser.add_argument("--resume")
     parser.add_argument("--profile-iters", type=int)
     parser.add_argument("--batch-size", type=int)
@@ -57,7 +58,11 @@ def main() -> None:
 
     experiment = str(config.get("name", args.config.stem))
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_dir = Path(config["save_root"]) / experiment / stamp
+    run_dir = (
+        args.run_dir.resolve()
+        if args.run_dir
+        else Path(config["save_root"]) / experiment / stamp
+    )
 
     resolved = dict(config)
     resolved["source_config"] = str(args.config.resolve())
