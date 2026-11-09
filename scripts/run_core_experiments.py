@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
 import subprocess
 import sys
@@ -107,6 +108,13 @@ def main():
             "--variant",
             variant,
         ]
+        if variant == "control" and not args.dry_run:
+            model_info = json.loads(
+                (run_dir / "model_info.json").read_text(encoding="utf-8")
+            )
+            eval_command.extend(
+                ["--control_channels", str(model_info["control_channels"])]
+            )
         run(eval_command, args.dry_run, eval_log)
 
         size_command = [

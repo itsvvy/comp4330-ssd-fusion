@@ -33,10 +33,24 @@ def parse_args():
         choices=["baseline", "control", "fusion"],
         default="baseline",
     )
-    parser.add_argument("--control_channels", type=int, default=768)
+    parser.add_argument("--control_channels", type=int)
     parser.add_argument("--confidence_threshold", type=float, default=0.01)
     parser.add_argument("--limit", type=int, default=0)
     return parser.parse_args()
+
+
+def infer_control_channels(checkpoint_path: str) -> int:
+    checkpoint = torch.load(
+        checkpoint_path, map_location="cpu", weights_only=False
+    )
+    state_dict = checkpoint.get("model", checkpoint)
+    key = "control.pointwise.weight"
+    if key not in state_dict:
+        raise ValueError(
+            "cannot infer control channels from a checkpoint without "
+            f"{key}"
+        )
+    return int(state_dict[key].shape[1])
 
 
 def parse_gt(xml_path: Path) -> list[dict]:
@@ -183,10 +197,16 @@ def main():
         "cuda" if torch.cuda.is_available() else "cpu"
     )
 
+    control_channels = args.control_channels
+    if args.variant == "control" and control_channels is None:
+        control_channels = infer_control_channels(args.trained_model)
+    if control_channels is None:
+        control_channels = 768
+
     model = build_ssd(
         "test",
         variant=args.variant,
-        control_channels=args.control_channels,
+        control_channels=control_channels,
     )
     model.load_weights(args.trained_model)
     model.to(device).eval()
