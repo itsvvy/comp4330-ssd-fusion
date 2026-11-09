@@ -47,13 +47,22 @@ def run(command: list[str], dry_run: bool, log_path: Path) -> None:
     with log_path.open("a", encoding="utf-8") as log:
         log.write(f"$ {rendered}\n")
         log.flush()
-        subprocess.run(
+        process = subprocess.Popen(
             command,
             cwd=ROOT,
-            check=True,
-            stdout=log,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
         )
+        assert process.stdout is not None
+        for line in process.stdout:
+            print(line, end="", flush=True)
+            log.write(line)
+            log.flush()
+        return_code = process.wait()
+        if return_code:
+            raise subprocess.CalledProcessError(return_code, command)
 
 
 def main():
