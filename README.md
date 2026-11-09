@@ -87,6 +87,11 @@ VOCdevkit/VOC2012
 Experiment settings live in `configs/`. All formal arms use the same iteration
 budget, augmentation, optimizer schedule, and evaluation code.
 
+The current course-project protocol uses 6,000 optimizer iterations: the VGG16
+backbone is frozen for the first 2,400 iterations, then unfrozen for the
+remaining 3,600. This preserves the intended two-stage schedule while reducing
+the estimated Colab cost of three arms to roughly 1.5-2 GPU hours.
+
 ```bash
 python scripts/run_experiment.py --config configs/m1_fusion.yaml
 ```

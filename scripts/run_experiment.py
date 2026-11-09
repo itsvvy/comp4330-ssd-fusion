@@ -58,16 +58,11 @@ def main() -> None:
     experiment = str(config.get("name", args.config.stem))
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_dir = Path(config["save_root"]) / experiment / stamp
-    run_dir.mkdir(parents=True, exist_ok=True)
 
     resolved = dict(config)
     resolved["source_config"] = str(args.config.resolve())
     resolved["run_dir"] = str(run_dir)
     resolved["resume"] = args.resume
-    (run_dir / "resolved_config.json").write_text(
-        json.dumps(resolved, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
 
     command = [
         sys.executable,
@@ -115,13 +110,19 @@ def main() -> None:
     if config.get("amp", True):
         command.append("--amp")
 
-    (run_dir / "command.txt").write_text(
-        shlex.join(command) + "\n", encoding="utf-8"
-    )
     print("run directory:", run_dir)
     print("command:", shlex.join(command))
     if args.dry_run:
         return
+
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "resolved_config.json").write_text(
+        json.dumps(resolved, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    (run_dir / "command.txt").write_text(
+        shlex.join(command) + "\n", encoding="utf-8"
+    )
 
     env = os.environ.copy()
     env.setdefault("PYTHONUNBUFFERED", "1")
