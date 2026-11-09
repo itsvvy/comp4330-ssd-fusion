@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import shlex
 import subprocess
 import sys
@@ -47,13 +48,22 @@ def run(command: list[str], dry_run: bool, log_path: Path) -> None:
     with log_path.open("a", encoding="utf-8") as log:
         log.write(f"$ {rendered}\n")
         log.flush()
-        subprocess.run(
+        process = subprocess.Popen(
             command,
             cwd=ROOT,
-            check=True,
-            stdout=log,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
         )
+        assert process.stdout is not None
+        for line in process.stdout:
+            print(line, end="", flush=True)
+            log.write(line)
+            log.flush()
+        return_code = process.wait()
+        if return_code:
+            raise subprocess.CalledProcessError(return_code, command)
 
 
 def main():
@@ -98,6 +108,13 @@ def main():
             "--variant",
             variant,
         ]
+        if variant == "control" and not args.dry_run:
+            model_info = json.loads(
+                (run_dir / "model_info.json").read_text(encoding="utf-8")
+            )
+            eval_command.extend(
+                ["--control_channels", str(model_info["control_channels"])]
+            )
         run(eval_command, args.dry_run, eval_log)
 
         size_command = [
