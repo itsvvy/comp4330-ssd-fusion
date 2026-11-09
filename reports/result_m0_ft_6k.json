@@ -1,0 +1,33 @@
+{
+  "arm": "M0-FT",
+  "variant": "baseline",
+  "protocol": {
+    "iterations": 6000,
+    "freeze_iterations": 2400,
+    "seed": 1337,
+    "batch_size": 8,
+    "gradient_accumulation": 2,
+    "amp": true,
+    "evaluation_split": "VOC2007 test",
+    "images": 4952,
+    "run_timestamp": "20261109T171953Z"
+  },
+  "total_parameters": 26285486,
+  "overall_map_0.5": 0.7725720172749051,
+  "latency_ms_mean": 42.44131356361202,
+  "fps": 23.561947452478748,
+  "size_bins": {
+    "small": {
+      "ap": 0.11108531777562503,
+      "recall": 0.7625272331154684
+    },
+    "medium": {
+      "ap": 0.6294735930251288,
+      "recall": 0.9119825708061002
+    },
+    "large": {
+      "ap": 0.8589707225294053,
+      "recall": 0.9643858202802967
+    }
+  }
+}
