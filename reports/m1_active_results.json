@@ -1,0 +1,61 @@
+{
+  "method": "forced-active normalized fusion branch",
+  "protocol": {
+    "iterations": 6000,
+    "backbone_frozen": true,
+    "scale": 0.05,
+    "scale_trainable": false,
+    "seed": 1337,
+    "evaluation_split": "VOC2007 test"
+  },
+  "published_baseline": {
+    "overall_map_0.5": 0.7766115029559962,
+    "small_ap": 0.10778111705367524,
+    "small_recall": 0.7705156136528686
+  },
+  "m0_ft": {
+    "overall_map_0.5": 0.7725720172749051,
+    "small_ap": 0.11108531777562503,
+    "small_recall": 0.7625272331154684,
+    "medium_ap": 0.6294735930251288,
+    "large_ap": 0.8589707225294053
+  },
+  "m1_active": {
+    "overall_map_0.5": 0.7773817332034672,
+    "latency_ms_mean": 35.81124324878903,
+    "fps": 27.924191099783037,
+    "small_ap": 0.10928450503147863,
+    "small_recall": 0.7712418300653595,
+    "medium_ap": 0.636191914629824,
+    "large_ap": 0.8592965554772285
+  },
+  "deltas_vs_published_baseline": {
+    "overall_map_0.5": 0.000770230247471,
+    "small_ap": 0.001503388,
+    "small_recall": 0.0007262164
+  },
+  "deltas_vs_m0_ft": {
+    "overall_map_0.5": 0.0048097159285621,
+    "small_ap": -0.0018008127441464,
+    "small_recall": 0.0087145969498911,
+    "medium_ap": 0.0067183216046952,
+    "large_ap": 0.0003258329478232
+  },
+  "final_branch": {
+    "pointwise_l1": 5700.505859375,
+    "branch_delta_rms": 0.04419417306780815,
+    "shallow_rms": 0.5748292207717896,
+    "relative_contribution": 0.0768818
+  },
+  "combined_tiled_pilot_500": {
+    "active_m1_plus_tiled": {
+      "overall_map_0.5": 0.8021568425976362,
+      "small_ap": 0.39065735247584976
+    },
+    "baseline_plus_tiled": {
+      "overall_map_0.5": 0.8068090284238915,
+      "small_ap": 0.3682794328211644
+    }
+  },
+  "decision": "M1 active is scientifically useful but not selected; selective tiled inference remains final"
+}

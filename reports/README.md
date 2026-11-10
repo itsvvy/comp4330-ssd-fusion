@@ -28,6 +28,11 @@ while reducing throughput.
 fusion-branch repair attempt. It improves small-object metrics but loses
 overall accuracy and is not the selected final method.
 
+`m1_active_results.json` and `m1_active_results.md` record the forced-active
+fusion experiment. The branch remains active at inference, but its complete 6k
+result does not improve small-object AP enough to replace selective tiled
+inference.
+
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
 artifact store.
