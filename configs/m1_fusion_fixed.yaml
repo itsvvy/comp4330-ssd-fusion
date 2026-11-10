@@ -1,0 +1,6 @@
+extends: base.yaml
+name: m1_fusion_fixed
+model_variant: fusion_fixed
+fusion_enabled: true
+fusion_channels: 512
+fusion_scale_init: 1.0

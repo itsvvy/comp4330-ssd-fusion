@@ -7,7 +7,9 @@ from layers.modules import MultiBoxLoss
 from ssd import build_ssd
 
 
-@pytest.mark.parametrize("variant", ["baseline", "control", "fusion"])
+@pytest.mark.parametrize(
+    "variant", ["baseline", "control", "fusion", "fusion_fixed"]
+)
 def test_train_and_test_forward_shapes(variant):
     model = build_ssd("train", variant=variant)
     model.eval()
@@ -56,6 +58,32 @@ def test_zero_gate_identity_and_branch_gradient():
     assert fusion.fusion.project.weight.grad is not None
     assert fusion.fusion.pointwise.weight.grad is not None
     assert fusion.fusion.project.weight.grad.abs().sum().item() > 0
+
+
+def test_fixed_fusion_identity_and_pointwise_gradient():
+    torch.manual_seed(7)
+    baseline = build_ssd("train", variant="baseline").eval()
+    fusion = build_ssd("train", variant="fusion_fixed").eval()
+    incompatible = fusion.load_state_dict(
+        baseline.state_dict(), strict=False
+    )
+    assert not incompatible.unexpected_keys
+    assert all(
+        key.startswith("fusion.") for key in incompatible.missing_keys
+    )
+    assert fusion.fusion.scale.item() == 1.0
+
+    images = torch.randn(1, 3, 300, 300)
+    with torch.no_grad():
+        baseline_output = baseline(images)
+        fusion_output = fusion(images)
+    for left, right in zip(baseline_output, fusion_output):
+        assert torch.allclose(left, right, atol=1e-6, rtol=1e-5)
+
+    loss = sum(output.sum() for output in fusion(images))
+    loss.backward()
+    assert fusion.fusion.pointwise.weight.grad is not None
+    assert fusion.fusion.pointwise.weight.grad.abs().sum().item() > 0
 
 
 def test_parameter_matched_control():

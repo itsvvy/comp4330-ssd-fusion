@@ -398,6 +398,10 @@ def train(args) -> None:
                 "backbone_lr": optimizer.param_groups[0]["lr"],
                 "frozen": frozen,
             }
+            if hasattr(model, "fusion"):
+                record["fusion_scale"] = float(
+                    model.fusion.scale.detach()
+                )
             with metrics_path.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(record) + "\n")
             print(

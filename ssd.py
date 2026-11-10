@@ -23,6 +23,9 @@ class GatedFeatureBranch(nn.Module):
         hidden_channels,
         output_channels=512,
         upsample=False,
+        normalize_output=False,
+        scale_init=0.0,
+        zero_init_pointwise=False,
     ):
         super().__init__()
         self.upsample = upsample
@@ -40,7 +43,12 @@ class GatedFeatureBranch(nn.Module):
         self.pointwise = nn.Conv2d(
             hidden_channels, output_channels, kernel_size=1, bias=False
         )
-        self.scale = nn.Parameter(torch.zeros(1))
+        if zero_init_pointwise:
+            nn.init.zeros_(self.pointwise.weight)
+        self.normalize_output = normalize_output
+        self.scale = nn.Parameter(
+            torch.tensor([float(scale_init)], dtype=torch.float32)
+        )
 
     def forward(self, shallow, deep=None):
         source = deep if deep is not None else shallow
@@ -54,6 +62,8 @@ class GatedFeatureBranch(nn.Module):
             )
         branch = F.relu(self.depthwise(branch), inplace=True)
         branch = self.pointwise(branch)
+        if self.normalize_output:
+            branch = F.normalize(branch, p=2, dim=1) * 20.0
         return shallow + self.scale * branch
 
 
@@ -74,7 +84,7 @@ class SSD(nn.Module):
         super().__init__()
         if phase not in {"train", "test"}:
             raise ValueError(f"unknown phase: {phase}")
-        if variant not in {"baseline", "control", "fusion"}:
+        if variant not in {"baseline", "control", "fusion", "fusion_fixed"}:
             raise ValueError(f"unknown variant: {variant}")
 
         self.phase = phase
@@ -92,9 +102,15 @@ class SSD(nn.Module):
         self.loc = nn.ModuleList(head[0])
         self.conf = nn.ModuleList(head[1])
 
-        if variant == "fusion":
+        if variant in {"fusion", "fusion_fixed"}:
             self.fusion = GatedFeatureBranch(
-                1024, 512, output_channels=512, upsample=True
+                1024,
+                512,
+                output_channels=512,
+                upsample=True,
+                normalize_output=variant == "fusion_fixed",
+                scale_init=1.0 if variant == "fusion_fixed" else 0.0,
+                zero_init_pointwise=variant == "fusion_fixed",
             )
         elif variant == "control":
             if control_channels <= 0:
@@ -125,7 +141,7 @@ class SSD(nn.Module):
 
     def forward(self, x):
         shallow, deep = self._base_features(x)
-        if self.variant == "fusion":
+        if self.variant in {"fusion", "fusion_fixed"}:
             shallow = self.fusion(shallow, deep)
         elif self.variant == "control":
             shallow = self.control(shallow)
@@ -190,6 +206,7 @@ class SSD(nn.Module):
         missing = list(incompatible.missing_keys)
         allowed_prefix = {
             "fusion": "fusion.",
+            "fusion_fixed": "fusion.",
             "control": "control.",
         }.get(self.variant)
         invalid_missing = [
