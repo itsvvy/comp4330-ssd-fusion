@@ -1,5 +1,9 @@
 # Experiment Records
 
+For the complete project narrative, start with
+[`experiment_history.md`](experiment_history.md). This index maps the frozen
+reports and experiment branches to their roles.
+
 `baseline_m0.json` records the released SSD300 VOC0712 checkpoint on VOC2007
 test. The standard evaluator reproduces 77.66% mAP at IoU 0.5, close to the
 repository's 77.43% reference. The size-stratified result uses the same saved
@@ -19,12 +23,14 @@ AMP fit comfortably on the available T4.
 completed without OOM or non-finite loss, but it is not used to select a model.
 
 `formal_6k_results.json` and `formal_6k_results.md` contain the final formal
-M0-FT, parameter-matched control C, and fusion M1 results. All three arms use
-the same 6,000-iteration protocol and one seed. The final test differences are
-very small; the Markdown report states the limitations explicitly.
+M0-FT, control C, and fusion M1 results. C is parameter-matched to M1 but is
+not FLOPs-matched. All three arms use the same 6,000-iteration protocol and one
+seed. The final test differences are very small; the Markdown report states the
+limitations explicitly.
 
 `fusion_gate_validation.md` records the diagnostic checks that explain the
-inactive and slow-starting behavior of the original fusion gate.
+inactive and slow-starting behavior of the original fusion gate, plus the
+completed follow-up 6k validation.
 
 `tiled_inference_results.json` and `tiled_inference_results.md` record the
 accuracy-first selective tiled inference experiment. It keeps the released

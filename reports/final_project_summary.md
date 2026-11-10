@@ -26,7 +26,8 @@ VOC2007 test, 4,952 images:
 
 The original 6k comparison of M0-FT, C, and M1 is recorded in
 `formal_6k_results.json`. M1 did not improve small-object AP relative to the
-matched fine-tuned baseline.
+matched fine-tuned baseline. C is parameter-matched to M1 but not
+FLOPs-matched; its wider bottleneck used about twice the branch MACs.
 
 Two follow-up fusion structures were screened and rejected:
 
@@ -47,8 +48,11 @@ The final tiled result needs only:
 - `tools/size_stratified_eval.py`;
 - the frozen parameters listed in `tiled_inference_results.json`.
 
-No training or test-set tuning is required. The exact commands are in the
-top-level README and final Colab notebook.
+The final result does not require retraining. Its frozen inference
+configuration was first checked on a 500-image pilot and then evaluated
+unchanged on the complete 4,952-image test set. Only the complete-test result
+is used for the final claim. The exact commands are in the top-level README and
+final Colab notebook.
 
 ## Known limitations
 

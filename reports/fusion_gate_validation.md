@@ -4,7 +4,8 @@
 
 These checks isolate likely causes of the near-zero difference between `M0-FT`,
 the parameter-matched control `C`, and fusion `M1`. They are architectural and
-optimization diagnostics, not VOC accuracy results.
+optimization diagnostics. The final section records the follow-up 6k
+validation that tested the diagnostic conclusions.
 
 ## Runtime and inputs
 
@@ -97,13 +98,18 @@ the single seed, and the small size of the observed metric differences are
 secondary explanations or measurement limitations. They are not needed to
 explain why this particular gate remains effectively inactive.
 
-## Recommended next validation
+## Follow-up validation completed
 
-Before another full 6k comparison, run one short GPU run with:
+The recommended normalization and activation checks were completed with full
+6k runs:
 
-1. normalized fusion-branch features,
-2. a small nonzero gate such as `0.01`,
-3. per-100-iteration logging of gate magnitude and branch/shallow RMS ratio.
+1. The normalized scale-1 repair raised small AP to `14.88%`, but overall mAP
+   fell to `76.99%` and the final branch output collapsed to zero.
+2. The forced-active run kept the branch at about `7.7%` relative contribution
+   and reached `77.74%` overall mAP, but small AP remained `10.93%`.
 
-That run should determine whether the fusion path becomes materially active.
-Only after that check is it worth paying for another full 6k accuracy run.
+These results show that activation alone does not fix the fusion design. Even
+after the branch was made measurably active, it did not improve the targeted
+small-object metric. The experiment was therefore concluded rather than
+repeating another full `M1` training run. Full results and interpretation are
+in [`experiment_history.md`](experiment_history.md).
