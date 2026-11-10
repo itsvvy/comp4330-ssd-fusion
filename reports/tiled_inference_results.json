@@ -1,0 +1,71 @@
+{
+  "method": "selective tiled inference",
+  "trained_model": "ssd300_mAP_77.43_v2.pth",
+  "model_weights_changed": false,
+  "inference": {
+    "full_image_pass": true,
+    "tile_grid": 2,
+    "tile_overlap_fraction": 0.2,
+    "tile_max_resized_area": 1024,
+    "tile_score_scale": 1.0,
+    "nms_threshold": 0.45,
+    "confidence_threshold": 0.01
+  },
+  "dataset": "VOC2007 test",
+  "images": 4952,
+  "baseline": {
+    "overall_map_0.5": 0.7766115029559962,
+    "latency_ms_mean": 52.45296355957067,
+    "fps": 19.064699725961205,
+    "size_bins": {
+      "small": {
+        "ap": 0.10778111705367524,
+        "recall": 0.7705156136528686
+      },
+      "medium": {
+        "ap": 0.6307355072233501,
+        "recall": 0.9159041394335512
+      },
+      "large": {
+        "ap": 0.859683318196289,
+        "recall": 0.964550700741962
+      }
+    }
+  },
+  "selective_tiled": {
+    "overall_map_0.5": 0.7832781061522752,
+    "latency_ms_mean": 183.59153832915916,
+    "fps": 5.44687412666651,
+    "size_bins": {
+      "small": {
+        "ap": 0.3064838819925913,
+        "recall": 0.9099491648511256,
+        "gt_count": 1377
+      },
+      "medium": {
+        "ap": 0.6053525287205963,
+        "recall": 0.914161220043573,
+        "gt_count": 4590
+      },
+      "large": {
+        "ap": 0.8496688151142796,
+        "recall": 0.964550700741962,
+        "gt_count": 6065
+      }
+    }
+  },
+  "deltas": {
+    "overall_map_0.5": 0.006666603196279,
+    "small_ap": 0.19870276493891606,
+    "small_recall": 0.139433551198257,
+    "medium_ap": -0.02538297850275385,
+    "large_ap": -0.0100145030820053,
+    "fps": -13.617825599294695
+  },
+  "pilot_500_images": {
+    "baseline_overall_map_0.5": 0.8029467384601151,
+    "selective_tiled_overall_map_0.5": 0.8068090284238915,
+    "baseline_small_ap": 0.14073201917767914,
+    "selective_tiled_small_ap": 0.3682794328211644
+  }
+}

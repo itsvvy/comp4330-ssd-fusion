@@ -249,6 +249,7 @@ def main():
     parser.add_argument("--voc-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--split", default="test")
+    parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
 
     image_ids = (
@@ -260,6 +261,8 @@ def main():
     ).read_text().splitlines()
     with args.detections.open("rb") as stream:
         detections = pickle.load(stream)
+    if args.limit:
+        image_ids = image_ids[: args.limit]
     if len(detections[0]) != len(image_ids):
         raise SystemExit(
             f"detection/image mismatch: {len(detections[0])} != {len(image_ids)}"
