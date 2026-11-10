@@ -120,7 +120,7 @@ input-scale adaptation.
 The complete sequence and branch-specific evidence are in
 [`reports/experiment_history.md`](reports/experiment_history.md).
 
-## 3. Final effective method
+## 3. Final effective method - Selective Tiled Inference
 
 ### 3.1 From feature fusion to tiled inference
 
