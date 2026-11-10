@@ -20,7 +20,52 @@ The result is measured on the complete 4,952-image VOC2007 test set. The
 method is accuracy-first: it performs five detector passes per image and is
 not intended as a real-time replacement for single-pass SSD300.
 
-![Final VOC2007 comparison](reports/figures/final_comparison.svg)
+![Experiment overview](reports/figures/experiment_overview.png)
+
+The overview figure is generated from the frozen experiment JSON by
+[`scripts/plot_results.py`](scripts/plot_results.py) using Matplotlib.
+
+## Project investigation
+
+The project began with the hypothesis that VGG16-SSD300's small-object weakness
+could be reduced by moving semantic information from conv7 into the
+higher-resolution conv4_3 feature, while controlling for both extra parameters
+and fine-tuning.
+
+The released checkpoint reproduced **77.66% overall mAP** but only **10.78%
+small-object AP**, compared with **85.97% large-object AP**. This established
+the scale imbalance that the project set out to diagnose.
+
+The proposed `conv7 -> conv4_3` branch was compared at the same 6k budget:
+
+| Arm | Overall mAP | Small AP | Finding |
+|---|---:|---:|---|
+| M0-FT | 77.26% | 11.11% | Fine-tuned baseline |
+| Parameter-matched C | 77.27% | 11.10% | Extra parameters alone did not help |
+| M1 zero-gate fusion | 77.26% | 11.07% | No measurable fusion gain |
+
+Diagnostics showed that the branch was numerically much weaker than the
+normalized conv4_3 map and that a zero gate delayed branch learning. Two
+repairs were tested. A normalized scale-1 branch raised small AP to 14.88% but
+lowered overall mAP to 76.99% and eventually collapsed to zero. A forced-active
+branch remained active at inference, reached 77.74% overall mAP, but did not
+improve small AP.
+
+Two further fusion designs were screened using matched 1k training budgets on
+the first 1,000 test images:
+
+| Screen | Overall mAP | Small AP | Outcome |
+|---|---:|---:|---|
+| 1k baseline | 78.36% | 13.00% | Control |
+| Multiscale residual fusion | 78.30% | 13.10% | Noise-level change |
+| 75x75 auxiliary head | 68.44% | 0.10% | False positives and latency regression |
+
+The evidence did not support adopting a fusion design. The project therefore
+kept the diagnostic and negative results and selected an inference-time method
+that directly enlarged small objects.
+
+The consolidated metrics and narrative are in
+[`reports/experiment_history.md`](reports/experiment_history.md).
 
 ## Final method
 
@@ -59,6 +104,14 @@ Use **Runtime > Change runtime type > T4 GPU**. The notebook:
 - runs the tests and a five-image inference smoke check.
 
 The full evaluation is opt-in because it takes about 20 minutes.
+
+To regenerate the figures directly from the frozen JSON:
+
+```bash
+python scripts/plot_results.py \
+  --history reports/experiment_history.json \
+  --output-dir reports/figures
+```
 
 ## Reproduce the final result
 

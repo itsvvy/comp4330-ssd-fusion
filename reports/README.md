@@ -6,6 +6,10 @@ repository's 77.43% reference. The size-stratified result uses the same saved
 detections after mapping annotations and detections into 300 x 300 input
 space.
 
+`experiment_history.json` and `experiment_history.md` consolidate the baseline
+diagnosis, 6k three-arm comparison, gate diagnostics, repair attempts, rejected
+alternative structures, and the final tiled result.
+
 `t4_profile_m1.json` records a 30-iteration compatibility/throughput profile
 followed by a five-iteration checkpoint resume. It is not an accuracy result.
 The profile establishes that batch size 8, gradient accumulation 2, and FP16
@@ -30,8 +34,14 @@ while reducing throughput.
 `final_project_summary.md` is the concise final-state summary and points to the
 frozen selected result.
 
-`figures/final_comparison.svg` visualizes the baseline and selected-method
-accuracy and throughput trade-off.
+`figures/experiment_overview.png` and `figures/experiment_overview.svg` are
+generated from `experiment_history.json` by `scripts/plot_results.py`.
+
+The detailed alternative-fusion records remain on their experiment branches:
+`m1_gatefix_results.*` and `m1_active_results.*` on
+`experiment/m1-gatefix`, `multiscale_fusion_screen.*` on
+`experiment/multiscale-fusion`, and `highres_small_head_screen.*` on
+`experiment/highres-small-head`.
 
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
