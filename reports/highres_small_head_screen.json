@@ -1,0 +1,32 @@
+{
+  "method": "conv3_3 high-resolution multi-scale small-object head",
+  "protocol": {
+    "iterations": 1000,
+    "backbone_frozen": true,
+    "seed": 1337,
+    "feature_map": 75,
+    "extra_priors": 22500,
+    "evaluation_images": 1000
+  },
+  "baseline_1k": {
+    "overall_map_0.5": 0.7835654125389206,
+    "small_ap": 0.13003992895837635,
+    "small_recall": 0.7680608365019012,
+    "medium_ap": 0.6386931486458951,
+    "medium_recall": 0.9165751920965971,
+    "large_ap": 0.859490035752594,
+    "large_recall": 0.9700249791840133
+  },
+  "highres_small_head_1k": {
+    "overall_map_0.5": 0.684443516261866,
+    "small_ap": 0.000988351030929975,
+    "small_recall": 0.7224334600760456,
+    "medium_ap": 0.006121134696026562,
+    "medium_recall": 0.8869374313940724,
+    "large_ap": 0.010637645173023414,
+    "large_recall": 0.9608659450457951,
+    "latency_ms_mean": 988.5466342929979,
+    "fps": 1.0115860651482502
+  },
+  "decision": "rejected; high false-positive ranking cost and insufficient calibration"
+}

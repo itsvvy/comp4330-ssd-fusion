@@ -24,6 +24,10 @@ accuracy-first selective tiled inference experiment. It keeps the released
 model weights unchanged and improves full VOC2007 test mAP and small-object AP
 while reducing throughput.
 
+`highres_small_head_screen.json` and `highres_small_head_screen.md` record the
+rejected 75 x 75 auxiliary-head screening experiment. The larger prior set
+produced severe false-positive and latency regressions.
+
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
 artifact store.
