@@ -1,0 +1,7 @@
+extends: base.yaml
+name: m1_fusion_multiscale_1k
+model_variant: fusion_multiscale
+fusion_enabled: true
+freeze_iter: 6000
+max_iter: 1000
+lr_steps: [600, 850, 950]
