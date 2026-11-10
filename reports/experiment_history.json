@@ -1,0 +1,94 @@
+{
+  "dataset": "VOC2007 test",
+  "published_baseline": {
+    "images": 4952,
+    "overall_map_at_iou_0_5": 0.7766115029559962,
+    "small_ap_at_iou_0_5": 0.10778111705367524,
+    "small_recall_at_iou_0_5": 0.7705156136528686,
+    "medium_ap_at_iou_0_5": 0.6307355072233501,
+    "large_ap_at_iou_0_5": 0.859683318196289,
+    "latency_ms": 52.45296355957067,
+    "fps": 19.064699725961205
+  },
+  "formal_6k": {
+    "m0_ft": {
+      "overall_map_at_iou_0_5": 0.7725720172749051,
+      "small_ap_at_iou_0_5": 0.11108531777562503,
+      "small_recall_at_iou_0_5": 0.7625272331154684,
+      "medium_ap_at_iou_0_5": 0.6294735930251288,
+      "large_ap_at_iou_0_5": 0.8589707225294053,
+      "latency_ms": 42.44131356361202,
+      "fps": 23.561947452478748,
+      "parameters": 26285486
+    },
+    "parameter_matched_control": {
+      "overall_map_at_iou_0_5": 0.7726707730811041,
+      "small_ap_at_iou_0_5": 0.11096737960355925,
+      "small_recall_at_iou_0_5": 0.7632534495279594,
+      "medium_ap_at_iou_0_5": 0.6291101411607026,
+      "large_ap_at_iou_0_5": 0.8586868678809082,
+      "latency_ms": 43.808711360464116,
+      "fps": 22.82651027490542,
+      "parameters": 27076765
+    },
+    "m1_zero_gate": {
+      "overall_map_at_iou_0_5": 0.7726425703711877,
+      "small_ap_at_iou_0_5": 0.11069647127757172,
+      "small_recall_at_iou_0_5": 0.7639796659404503,
+      "medium_ap_at_iou_0_5": 0.6291737021129622,
+      "large_ap_at_iou_0_5": 0.8593263770785939,
+      "latency_ms": 42.828744224354644,
+      "fps": 23.34880506329084,
+      "parameters": 27076527
+    },
+    "m1_gatefix": {
+      "overall_map_at_iou_0_5": 0.7699227974707552,
+      "small_ap_at_iou_0_5": 0.1487858799815964,
+      "small_recall_at_iou_0_5": 0.8140885984023238,
+      "medium_ap_at_iou_0_5": 0.6151780032776467,
+      "large_ap_at_iou_0_5": 0.8445058662878085,
+      "latency_ms": 64.65257219043524,
+      "fps": 15.467288711336698
+    },
+    "m1_active": {
+      "overall_map_at_iou_0_5": 0.7773817332034672,
+      "small_ap_at_iou_0_5": 0.10928450503147863,
+      "small_recall_at_iou_0_5": 0.7712418300653595,
+      "medium_ap_at_iou_0_5": 0.636191914629824,
+      "large_ap_at_iou_0_5": 0.8592965554772285,
+      "latency_ms": 35.81124324878903,
+      "fps": 27.924191099783037
+    }
+  },
+  "screens": {
+    "subset": "first 1000 VOC2007 test images",
+    "iterations": 1000,
+    "baseline": {
+      "overall_map_at_iou_0_5": 0.7835654125389206,
+      "small_ap_at_iou_0_5": 0.13003992895837635,
+      "small_recall_at_iou_0_5": 0.7680608365019012
+    },
+    "multiscale_residual": {
+      "overall_map_at_iou_0_5": 0.7830115789104546,
+      "small_ap_at_iou_0_5": 0.13102994234439638,
+      "small_recall_at_iou_0_5": 0.7604562737642585
+    },
+    "high_resolution_head": {
+      "overall_map_at_iou_0_5": 0.684443516261866,
+      "small_ap_at_iou_0_5": 0.000988351030929975,
+      "small_recall_at_iou_0_5": 0.7224334600760456,
+      "latency_ms": 988.5466342929979,
+      "fps": 1.0115860651482502
+    }
+  },
+  "selected_tiled_inference": {
+    "images": 4952,
+    "overall_map_at_iou_0_5": 0.7832781061522752,
+    "small_ap_at_iou_0_5": 0.3064838819925913,
+    "small_recall_at_iou_0_5": 0.9099491648511256,
+    "medium_ap_at_iou_0_5": 0.6053525287205963,
+    "large_ap_at_iou_0_5": 0.8496688151142796,
+    "latency_ms": 183.59153832915916,
+    "fps": 5.44687412666651
+  }
+}
