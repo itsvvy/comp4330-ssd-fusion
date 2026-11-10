@@ -170,9 +170,9 @@ class SSD(nn.Module):
                 "max_sizes": [24],
                 "steps": [4],
                 "aspect_ratios": [[2]],
-                "variance": cfg["variance"],
+                "variance": self.cfg["variance"],
                 "clip": True,
-                "name": cfg["name"],
+                "name": self.cfg["name"],
             }
             self.priors = torch.cat(
                 (self.priors, PriorBox(small_cfg).forward()), dim=0
