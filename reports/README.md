@@ -19,10 +19,19 @@ M0-FT, parameter-matched control C, and fusion M1 results. All three arms use
 the same 6,000-iteration protocol and one seed. The final test differences are
 very small; the Markdown report states the limitations explicitly.
 
+`fusion_gate_validation.md` records the diagnostic checks that explain the
+inactive and slow-starting behavior of the original fusion gate.
+
 `tiled_inference_results.json` and `tiled_inference_results.md` record the
 accuracy-first selective tiled inference experiment. It keeps the released
 model weights unchanged and improves full VOC2007 test mAP and small-object AP
 while reducing throughput.
+
+`final_project_summary.md` is the concise final-state summary and points to the
+frozen selected result.
+
+`figures/final_comparison.svg` visualizes the baseline and selected-method
+accuracy and throughput trade-off.
 
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
