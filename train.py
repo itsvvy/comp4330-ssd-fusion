@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument("--checkpoint_every", type=int, default=500)
     parser.add_argument(
         "--fusion_mode",
-        choices=["baseline", "control", "fusion"],
+        choices=["baseline", "control", "fusion", "fusion_fixed"],
         default="baseline",
     )
     parser.add_argument("--control_channels", type=int, default=768)
