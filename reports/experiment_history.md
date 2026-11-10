@@ -107,6 +107,14 @@ regressions. The screen was rejected.
 
 ## 6. Inference-time alternative
 
+Small recall was `77.05%` despite `10.78%` small AP. At the saved-detection
+level, this means many small objects had an IoU 0.5 match in the low-confidence
+list, but false positives and low-confidence ranking kept AP low. The result
+did not show that every small object was represented well, but it showed that
+the main limitation was not simply a missing multi-scale prediction path.
+Feature fusion could add semantics, while the 300 x 300 input still discarded
+pixels needed to improve tiny-object precision.
+
 Selective tiled inference keeps the model unchanged and runs one full-image
 pass plus four overlapping tiles. Only tile detections in the small-object
 area range are merged with the full-image detections.

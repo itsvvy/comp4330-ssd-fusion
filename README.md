@@ -1,4 +1,4 @@
-# COMP4330: Small-Object Detection on VGG16-SSD300
+# COMP4330: Enhancing Small-Object Detection on VGG16-SSD300
 
 This repository records a COMP4330 course project that tested whether
 cross-scale feature fusion could reduce the small-object weakness of
@@ -15,7 +15,7 @@ weights unchanged.
 | What is the final measured result? | [`reports/final_project_summary.md`](reports/final_project_summary.md) |
 | Which artifact contains which experiment? | [`reports/README.md`](reports/README.md) |
 | Where is the chronological run log? | [Colab experiment record](https://colab.research.google.com/drive/1kTnOphcCSUmjX6UQpEoj4zWjvLR-Fp5R) |
-| How do I run the reproducible final path? | [Final Colab runner](https://colab.research.google.com/github/itsvvy/comp4330-ssd-fusion/blob/main/notebooks/COMP4330_sef_runner.ipynb) |
+| How do I run the reproducible final path? | [Final Colab runner](https://colab.research.google.com/github/itsvvy/comp4330-ssd-small-object/blob/main/notebooks/COMP4330_sef_runner.ipynb) |
 
 ## 1. Problem and baseline
 
@@ -107,7 +107,10 @@ also reduced small recall. It does not provide usable evidence of a gain.
 ### 2.5 Research conclusion
 
 The feature-fusion hypothesis was not supported by the available experiments.
-The outcome is not explained only by the initial zero gate: normalization
+This does not prove that feature fusion is universally ineffective; it does
+establish that none of the tested variants produced a reliable overall gain
+under this project's warm-start, single-seed, and 6k training constraints. The
+outcome is not explained only by the initial zero gate: normalization
 temporarily raised small AP but lowered overall mAP and later collapsed to
 zero, while forced activation kept the branch active but did not improve small
 AP. We retained these negative results because they narrow the design choice
@@ -119,7 +122,34 @@ The complete sequence and branch-specific evidence are in
 
 ## 3. Final effective method
 
-### 3.1 Selective Tiled Inference
+### 3.1 From feature fusion to tiled inference
+
+The baseline's small-object metrics explain the change of direction. Under this
+repository's size-stratified evaluator, recall is computed from the saved
+detections after the model's `0.01` confidence threshold and NMS. Small recall
+is `77.05%`, while small AP is only `10.78%`. In other words, many small ground
+truth objects already have an IoU >= 0.5 match somewhere in the low-confidence
+detection list, but those matches are diluted by false positives or ranked
+behind them when AP is computed.
+
+This argues against treating the problem as a complete absence of small-object
+spatial information, although it does not mean every small object is
+represented well: `22.95%` of small ground truth objects remain unmatched at
+IoU 0.5 in this evaluation. It points to two coupled bottlenecks: the detector
+needs better precision/ranking for tiny objects, and the 300 x 300 input still
+compresses their available pixels and effective scale. A `conv7 -> conv4_3`
+branch can propagate semantic context, but upsampling a `19 x 19` map cannot
+restore image detail that was already lost. The active-branch experiments
+confirmed that adding this path did not improve small AP.
+
+Selective Tiled Inference targets the scale bottleneck directly. Cropping an
+image into four overlapping tiles makes a small object occupy more pixels in
+the detector input while leaving SSD300 and its learned weights unchanged. The
+small-area filter then admits tile detections only where this scale correction
+is useful. This follows from the baseline diagnosis and is supported by the
+complete-test result below rather than by feature-fusion assumptions.
+
+### 3.2 Selective Tiled Inference
 
 For each image:
 
@@ -141,7 +171,7 @@ The fixed configuration is:
 
 The model checkpoint is unchanged. Only inference is modified.
 
-### 3.2 Full VOC2007 test result
+### 3.3 Full VOC2007 test result
 
 | Metric | Released SSD300 | Selective Tiled | Delta |
 |---|---:|---:|---:|
@@ -162,7 +192,7 @@ project metric is the complete-test result, not the pilot.
 The figure is generated from frozen experiment data by
 [`scripts/plot_results.py`](scripts/plot_results.py) using Matplotlib.
 
-### 3.3 Why the selectors matter
+### 3.4 Why the selectors matter
 
 Keeping every tile detection was tested first and reduced overall mAP to
 63.32%. Tiles produced many duplicated and high-scoring false detections that
@@ -174,7 +204,7 @@ predictions from the full-image SSD pass. This is why the final method keeps
 the full-image pass and uses tiles selectively rather than replacing the
 original inference path.
 
-### 3.4 Cost
+### 3.5 Cost
 
 The method performs five SSD300 passes per image. It is an accuracy-first
 small-object enhancement, not a real-time replacement for single-pass SSD300.
@@ -280,7 +310,7 @@ Independent experiment branches retain the original work:
 - `experiment/highres-small-head`: rejected high-resolution head screen
 
 No pushed branch is rewritten or deleted. The current frozen documentation and
-result state is identified by the `course-final-v1.0.5` tag.
+result state is identified by the `course-final-v1.0.6` tag.
 
 ### 4.5 Limitations
 
