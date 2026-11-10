@@ -44,4 +44,7 @@ def test_merge_class_detections_suppresses_duplicate():
     ]
     merged = merge_class_detections(rows, nms_threshold=0.45)
     assert merged.shape == (2, 5)
-    assert torch.allclose(merged[0], rows[0][0])
+    assert torch.allclose(
+        merged[0],
+        torch.tensor([10.0, 10.0, 50.0, 50.0, 0.9]),
+    )

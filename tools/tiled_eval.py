@@ -98,7 +98,8 @@ def merge_class_detections(detections, nms_threshold, top_k=200):
         overlap=nms_threshold,
         top_k=top_k,
     )
-    return merged[keep[:count]]
+    selected = merged[keep[:count]]
+    return selected[:, [1, 2, 3, 4, 0]]
 
 
 def main():
