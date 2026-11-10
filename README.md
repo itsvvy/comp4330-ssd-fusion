@@ -220,8 +220,8 @@ Experimental work remains on independent branches:
 - `experiment/multiscale-fusion`: rejected multiscale residual fusion screen
 - `experiment/highres-small-head`: rejected 75x75 auxiliary-head screen
 
-No pushed branch is rewritten or deleted. The final frozen state is identified
-by the `course-final-v1.0.0` tag.
+No pushed branch is rewritten or deleted. The current frozen state is identified
+by the `course-final-v1.0.3` tag.
 
 ## Limitations
 
