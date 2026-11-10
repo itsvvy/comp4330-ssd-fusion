@@ -24,6 +24,9 @@ accuracy-first selective tiled inference experiment. It keeps the released
 model weights unchanged and improves full VOC2007 test mAP and small-object AP
 while reducing throughput.
 
+`multiscale_fusion_screen.json` and `multiscale_fusion_screen.md` record the
+rejected 1k-budget fusion screen.
+
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
 artifact store.

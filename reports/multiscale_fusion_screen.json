@@ -1,0 +1,28 @@
+{
+  "method": "conv4_3 + conv7 + conv8_2 + conv9_2 residual fusion",
+  "protocol": {
+    "iterations": 1000,
+    "backbone_frozen": true,
+    "seed": 1337,
+    "evaluation_images": 1000
+  },
+  "baseline_1k": {
+    "overall_map_0.5": 0.7835654125389206,
+    "small_ap": 0.13003992895837635,
+    "small_recall": 0.7680608365019012,
+    "medium_ap": 0.6386931486458951,
+    "medium_recall": 0.9165751920965971,
+    "large_ap": 0.859490035752594,
+    "large_recall": 0.9700249791840133
+  },
+  "multiscale_fusion_1k": {
+    "overall_map_0.5": 0.7830115789104546,
+    "small_ap": 0.13102994234439638,
+    "small_recall": 0.7604562737642585,
+    "medium_ap": 0.6377676815687391,
+    "medium_recall": 0.9121844127332601,
+    "large_ap": 0.8599279555810202,
+    "large_recall": 0.9708576186511241
+  },
+  "decision": "rejected; no material gain under matched 1k budget"
+}
