@@ -39,6 +39,32 @@ They reproduce 77.66% overall VOC2007 mAP@0.5 and expose a large input-space
 small-object gap; these are preliminary course-project results, not the final
 fusion comparison.
 
+## Validated small-object improvement
+
+Selective tiled inference keeps the released SSD300 weights unchanged, runs
+the full image plus four overlapping tiles, and merges only tile detections in
+the input-space small-object area range. On the complete VOC2007 test set it
+improves:
+
+- overall mAP@0.5: 77.66% to 78.33%
+- small-object AP@0.5: 10.78% to 30.65%
+- small-object recall@0.5: 77.05% to 90.99%
+
+The cost is lower throughput: about 5.45 FPS versus 19.06 FPS for the
+single-pass baseline. See `reports/tiled_inference_results.md`.
+
+```bash
+python tools/tiled_eval.py \
+  --trained_model /path/to/ssd300_mAP_77.43_v2.pth \
+  --voc_root /content/data/VOCdevkit \
+  --save_folder /path/to/tiled_eval \
+  --variant baseline \
+  --tile_grid 2 \
+  --overlap 0.2 \
+  --include_full \
+  --tile_max_area 1024
+```
+
 ## Local setup
 
 On Windows, use WSL2 Ubuntu 22.04. Keep the repository and environments in the
