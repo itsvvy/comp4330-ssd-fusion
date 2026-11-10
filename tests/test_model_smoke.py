@@ -8,7 +8,8 @@ from ssd import build_ssd
 
 
 @pytest.mark.parametrize(
-    "variant", ["baseline", "control", "fusion", "fusion_fixed"]
+    "variant",
+    ["baseline", "control", "fusion", "fusion_fixed", "fusion_active"],
 )
 def test_train_and_test_forward_shapes(variant):
     model = build_ssd("train", variant=variant)
@@ -84,6 +85,12 @@ def test_fixed_fusion_identity_and_pointwise_gradient():
     loss.backward()
     assert fusion.fusion.pointwise.weight.grad is not None
     assert fusion.fusion.pointwise.weight.grad.abs().sum().item() > 0
+
+
+def test_active_fusion_has_fixed_nonzero_scale():
+    model = build_ssd("train", variant="fusion_active")
+    assert model.fusion.scale.item() == 0.05
+    assert not model.fusion.scale.requires_grad
 
 
 def test_parameter_matched_control():
