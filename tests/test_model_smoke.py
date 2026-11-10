@@ -7,21 +7,33 @@ from layers.modules import MultiBoxLoss
 from ssd import build_ssd
 
 
-@pytest.mark.parametrize("variant", ["baseline", "control", "fusion"])
+@pytest.mark.parametrize(
+    "variant", ["baseline", "control", "fusion", "small_head_fusion"]
+)
 def test_train_and_test_forward_shapes(variant):
     model = build_ssd("train", variant=variant)
     model.eval()
     with torch.no_grad():
         loc, conf, priors = model(torch.randn(1, 3, 300, 300))
-    assert loc.shape == (1, 8732, 4)
-    assert conf.shape == (1, 8732, 21)
-    assert priors.shape == (8732, 4)
+    expected_priors = (
+        8732 + 75 * 75 * 4
+        if variant == "small_head_fusion"
+        else 8732
+    )
+    assert loc.shape == (1, expected_priors, 4)
+    assert conf.shape == (1, expected_priors, 21)
+    assert priors.shape == (expected_priors, 4)
 
     detector = build_ssd("test", variant=variant)
     detector.eval()
     with torch.no_grad():
         detections = detector(torch.randn(1, 3, 300, 300))
     assert detections.shape == (1, 21, 200, 5)
+
+
+def test_small_head_adds_higher_resolution_priors():
+    model = build_ssd("train", variant="small_head_fusion")
+    assert model.priors.shape[0] == 8732 + 75 * 75 * 4
 
 
 def test_zero_gate_identity_and_branch_gradient():

@@ -57,6 +57,49 @@ class GatedFeatureBranch(nn.Module):
         return shallow + self.scale * branch
 
 
+class HighResolutionFusion(nn.Module):
+    """Fuse conv3_3, conv4_3 and conv7 at the conv3_3 resolution."""
+
+    def __init__(
+        self,
+        input_channels=(256, 512, 1024),
+        project_channels=64,
+        output_channels=512,
+    ):
+        super().__init__()
+        self.projections = nn.ModuleList(
+            [
+                nn.Conv2d(channels, project_channels, kernel_size=1)
+                for channels in input_channels
+            ]
+        )
+        self.fusion = nn.Conv2d(
+            project_channels * len(input_channels),
+            output_channels,
+            kernel_size=3,
+            padding=1,
+        )
+
+    def forward(self, high, shallow, deep):
+        target_size = high.shape[-2:]
+        projected = []
+        for source, projection in zip(
+            (high, shallow, deep), self.projections
+        ):
+            feature = F.relu(projection(source), inplace=True)
+            if feature.shape[-2:] != target_size:
+                feature = F.interpolate(
+                    feature,
+                    size=target_size,
+                    mode="bilinear",
+                    align_corners=False,
+                )
+            projected.append(feature)
+        return F.relu(
+            self.fusion(torch.cat(projected, dim=1)), inplace=True
+        )
+
+
 class SSD(nn.Module):
     """SSD300 with optional fusion or parameter-matched control branch."""
 
@@ -74,7 +117,12 @@ class SSD(nn.Module):
         super().__init__()
         if phase not in {"train", "test"}:
             raise ValueError(f"unknown phase: {phase}")
-        if variant not in {"baseline", "control", "fusion"}:
+        if variant not in {
+            "baseline",
+            "control",
+            "fusion",
+            "small_head_fusion",
+        }:
             raise ValueError(f"unknown variant: {variant}")
 
         self.phase = phase
@@ -105,6 +153,30 @@ class SSD(nn.Module):
                 output_channels=512,
                 upsample=False,
             )
+        elif variant == "small_head_fusion":
+            self.small_fusion = HighResolutionFusion()
+            self.small_loc = nn.Conv2d(
+                512, 4 * 4, kernel_size=3, padding=1
+            )
+            self.small_conf = nn.Conv2d(
+                512, 4 * num_classes, kernel_size=3, padding=1
+            )
+            self.small_loc.load_state_dict(self.loc[0].state_dict())
+            self.small_conf.load_state_dict(self.conf[0].state_dict())
+            small_cfg = {
+                "min_dim": 300,
+                "feature_maps": [75],
+                "min_sizes": [12],
+                "max_sizes": [24],
+                "steps": [4],
+                "aspect_ratios": [[2]],
+                "variance": cfg["variance"],
+                "clip": True,
+                "name": cfg["name"],
+            }
+            self.priors = torch.cat(
+                (self.priors, PriorBox(small_cfg).forward()), dim=0
+            )
         elif phase == "test":
             self.softmax = nn.Softmax(dim=-1)
             self.detect = Detect(num_classes, 0, 200, 0.01, 0.45)
@@ -115,16 +187,19 @@ class SSD(nn.Module):
             self.detect = Detect(num_classes, 0, 200, 0.01, 0.45)
 
     def _base_features(self, x):
+        high_res = None
         for index in range(23):
             x = self.vgg[index](x)
+            if index == 15:
+                high_res = x
         shallow_raw = x
         shallow = self.L2Norm(shallow_raw)
         for index in range(23, len(self.vgg)):
             x = self.vgg[index](x)
-        return shallow, x
+        return shallow, x, high_res
 
     def forward(self, x):
-        shallow, deep = self._base_features(x)
+        shallow, deep, high_res = self._base_features(x)
         if self.variant == "fusion":
             shallow = self.fusion(shallow, deep)
         elif self.variant == "control":
@@ -149,6 +224,19 @@ class SSD(nn.Module):
             )
             confidences.append(
                 conf_layer(source)
+                .permute(0, 2, 3, 1)
+                .contiguous()
+            )
+
+        if self.variant == "small_head_fusion":
+            small_feature = self.small_fusion(high_res, shallow, deep)
+            locations.append(
+                self.small_loc(small_feature)
+                .permute(0, 2, 3, 1)
+                .contiguous()
+            )
+            confidences.append(
+                self.small_conf(small_feature)
                 .permute(0, 2, 3, 1)
                 .contiguous()
             )
@@ -191,11 +279,25 @@ class SSD(nn.Module):
         allowed_prefix = {
             "fusion": "fusion.",
             "control": "control.",
+            "small_head_fusion": (
+                "small_fusion.",
+                "small_loc.",
+                "small_conf.",
+            ),
         }.get(self.variant)
+
+        def allowed_missing(key):
+            if allowed_prefix is None:
+                return False
+            prefixes = (
+                allowed_prefix
+                if isinstance(allowed_prefix, tuple)
+                else (allowed_prefix,)
+            )
+            return any(key.startswith(prefix) for prefix in prefixes)
+
         invalid_missing = [
-            key
-            for key in missing
-            if not allowed_prefix or not key.startswith(allowed_prefix)
+            key for key in missing if not allowed_missing(key)
         ]
         if unexpected or invalid_missing:
             raise RuntimeError(
