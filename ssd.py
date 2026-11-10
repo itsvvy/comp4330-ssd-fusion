@@ -57,6 +57,52 @@ class GatedFeatureBranch(nn.Module):
         return shallow + self.scale * branch
 
 
+class MultiScaleFusion(nn.Module):
+    """Fuse SSD's first four source maps into the conv4_3 detector space."""
+
+    def __init__(
+        self,
+        input_channels,
+        project_channels=64,
+        output_channels=512,
+        scale=0.05,
+    ):
+        super().__init__()
+        self.projections = nn.ModuleList(
+            [
+                nn.Conv2d(channels, project_channels, kernel_size=1)
+                for channels in input_channels
+            ]
+        )
+        self.fusion = nn.Conv2d(
+            project_channels * len(input_channels),
+            output_channels,
+            kernel_size=3,
+            padding=1,
+        )
+        self.scale = nn.Parameter(torch.tensor([scale]), requires_grad=False)
+
+    def forward(self, sources):
+        shallow = sources[0]
+        target_size = shallow.shape[-2:]
+        projected = []
+        for source, projection in zip(sources, self.projections):
+            feature = F.relu(projection(source), inplace=True)
+            if feature.shape[-2:] != target_size:
+                feature = F.interpolate(
+                    feature,
+                    size=target_size,
+                    mode="bilinear",
+                    align_corners=False,
+                )
+            projected.append(feature)
+        fused = F.relu(
+            self.fusion(torch.cat(projected, dim=1)), inplace=True
+        )
+        fused = F.normalize(fused, p=2, dim=1) * 20.0
+        return shallow + self.scale * fused
+
+
 class SSD(nn.Module):
     """SSD300 with optional fusion or parameter-matched control branch."""
 
@@ -74,7 +120,12 @@ class SSD(nn.Module):
         super().__init__()
         if phase not in {"train", "test"}:
             raise ValueError(f"unknown phase: {phase}")
-        if variant not in {"baseline", "control", "fusion"}:
+        if variant not in {
+            "baseline",
+            "control",
+            "fusion",
+            "fusion_multiscale",
+        }:
             raise ValueError(f"unknown variant: {variant}")
 
         self.phase = phase
@@ -95,6 +146,13 @@ class SSD(nn.Module):
         if variant == "fusion":
             self.fusion = GatedFeatureBranch(
                 1024, 512, output_channels=512, upsample=True
+            )
+        elif variant == "fusion_multiscale":
+            self.fusion = MultiScaleFusion(
+                (512, 1024, 512, 256),
+                project_channels=64,
+                output_channels=512,
+                scale=0.05,
             )
         elif variant == "control":
             if control_channels <= 0:
@@ -125,17 +183,19 @@ class SSD(nn.Module):
 
     def forward(self, x):
         shallow, deep = self._base_features(x)
-        if self.variant == "fusion":
-            shallow = self.fusion(shallow, deep)
-        elif self.variant == "control":
-            shallow = self.control(shallow)
-
         sources = [shallow, deep]
         features = deep
         for index, layer in enumerate(self.extras):
             features = F.relu(layer(features), inplace=True)
             if index % 2 == 1:
                 sources.append(features)
+
+        if self.variant == "fusion":
+            sources[0] = self.fusion(sources[0], sources[1])
+        elif self.variant == "fusion_multiscale":
+            sources[0] = self.fusion(sources[:4])
+        elif self.variant == "control":
+            sources[0] = self.control(sources[0])
 
         locations = []
         confidences = []
@@ -190,6 +250,7 @@ class SSD(nn.Module):
         missing = list(incompatible.missing_keys)
         allowed_prefix = {
             "fusion": "fusion.",
+            "fusion_multiscale": "fusion.",
             "control": "control.",
         }.get(self.variant)
         invalid_missing = [

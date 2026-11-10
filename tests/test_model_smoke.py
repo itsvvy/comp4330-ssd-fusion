@@ -7,7 +7,9 @@ from layers.modules import MultiBoxLoss
 from ssd import build_ssd
 
 
-@pytest.mark.parametrize("variant", ["baseline", "control", "fusion"])
+@pytest.mark.parametrize(
+    "variant", ["baseline", "control", "fusion", "fusion_multiscale"]
+)
 def test_train_and_test_forward_shapes(variant):
     model = build_ssd("train", variant=variant)
     model.eval()
@@ -69,6 +71,13 @@ def test_parameter_matched_control():
     )
     relative_error = abs(fusion_parameters - control_parameters) / fusion_parameters
     assert relative_error < 0.01
+
+
+def test_multiscale_fusion_uses_fixed_nonzero_scale():
+    model = build_ssd("train", variant="fusion_multiscale")
+    assert model.fusion.scale.item() == pytest.approx(0.05)
+    assert not model.fusion.scale.requires_grad
+    assert len(model.fusion.projections) == 4
 
 
 def test_baseline_checkpoint_only_allows_new_branch_keys(tmp_path: Path):

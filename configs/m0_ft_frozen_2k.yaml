@@ -1,0 +1,7 @@
+extends: base.yaml
+name: m0_ft_frozen_2k
+model_variant: baseline
+fusion_enabled: false
+freeze_iter: 6000
+max_iter: 2000
+lr_steps: [1200, 1700, 1900]

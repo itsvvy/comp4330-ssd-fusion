@@ -35,7 +35,12 @@ def parse_args():
     parser.add_argument("--save_folder", required=True)
     parser.add_argument(
         "--variant",
-        choices=["baseline", "control", "fusion"],
+        choices=[
+            "baseline",
+            "control",
+            "fusion",
+            "fusion_multiscale",
+        ],
         default="baseline",
     )
     parser.add_argument("--control_channels", type=int)
