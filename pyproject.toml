@@ -3,9 +3,9 @@ requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "comp4330-ssd-fusion"
+name = "comp4330-ssd-small-object"
 version = "0.1.0"
-description = "Size-stratified SSD300 evaluation with lightweight cross-scale fusion"
+description = "Enhancing small-object detection for VGG16-SSD300 with selective tiled inference"
 requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
