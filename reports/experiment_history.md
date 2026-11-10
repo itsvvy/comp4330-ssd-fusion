@@ -24,11 +24,15 @@ All three formal arms used the same VOC0712 training data, released checkpoint,
 | Arm | Overall mAP | Small AP | Medium AP | Large AP |
 |---|---:|---:|---:|---:|
 | M0-FT | 77.26% | 11.11% | 62.95% | 85.90% |
-| C control | 77.27% | 11.10% | 62.91% | 85.87% |
+| C control, parameter-matched | 77.27% | 11.10% | 62.91% | 85.87% |
 | M1 zero-gate | 77.26% | 11.07% | 62.92% | 85.93% |
 
-The result was neutral. A parameter-only control behaved the same as M0-FT,
-and the cross-scale branch did not improve small-object AP.
+The result was neutral. The parameter-only control behaved the same as M0-FT,
+and the cross-scale branch did not improve small-object AP. `C` matched the
+parameter count of `M1` but not its FLOPs: its branch used about `1,143M` MACs
+versus about `574M` for `M1`. The controlled comparison therefore separates
+additional capacity from the cross-scale path without claiming compute
+matching.
 
 ## 3. Why the original M1 branch was weak
 
@@ -105,14 +109,33 @@ regressions. The screen was rejected.
 
 Selective tiled inference keeps the model unchanged and runs one full-image
 pass plus four overlapping tiles. Only tile detections in the small-object
-area range are merged.
+area range are merged with the full-image detections.
 
-Full VOC2007 test result:
+The fixed configuration is:
 
-- overall mAP: 78.33% (+0.67 pp over the released model)
-- small AP: 30.65% (+19.87 pp)
-- small recall: 90.99% (+13.94 pp)
-- FPS: 5.45 versus 19.06
+- one full-image pass;
+- a `2 x 2` tile grid with `0.2` overlap;
+- tile detections retained only at a maximum resized area of `32 x 32 = 1024`;
+- per-class NMS at IoU `0.45`;
+- tile score scale `1.0`.
+
+Full VOC2007 test result on all 4,952 images:
+
+| Metric | SSD300 | Selective tiled | Delta |
+|---|---:|---:|---:|
+| Overall mAP at IoU 0.5 | 77.66% | 78.33% | +0.67 pp |
+| Small AP at IoU 0.5 | 10.78% | 30.65% | +19.87 pp |
+| Small recall at IoU 0.5 | 77.05% | 90.99% | +13.94 pp |
+| Medium AP at IoU 0.5 | 63.07% | 60.54% | -2.54 pp |
+| Large AP at IoU 0.5 | 85.97% | 84.97% | -1.00 pp |
+| Latency | 52.45 ms/image | 183.59 ms/image | +131.14 ms |
+| FPS | 19.06 | 5.45 | -13.62 |
 
 This became the selected method because it produces a large, directly measured
-small-object improvement on the complete test set.
+small-object improvement on the complete test set. The 500-image pilot used
+the same inference parameters; the table above uses the complete test result.
+
+The main cost is five detector passes per image. Small-object accuracy and
+recall increase substantially, while medium/large AP decrease slightly and
+throughput falls by about 3.5 times. The final report is
+[`tiled_inference_results.md`](tiled_inference_results.md).
