@@ -7,15 +7,15 @@ selected final method therefore changes only inference: **Selective Tiled
 Inference** magnifies local image regions while keeping the released detector
 weights unchanged.
 
-## Start here
+## Project documentation
 
-| Reader question | Document |
+| Topic | Document |
 |---|---|
-| Why did the feature-fusion idea fail? | [`reports/experiment_history.md`](reports/experiment_history.md) |
-| What is the final measured result? | [`reports/final_project_summary.md`](reports/final_project_summary.md) |
-| Which artifact contains which experiment? | [`reports/README.md`](reports/README.md) |
-| Where is the chronological run log? | [Colab experiment record](https://colab.research.google.com/drive/1kTnOphcCSUmjX6UQpEoj4zWjvLR-Fp5R) |
-| How do I run the reproducible final path? | [Final Colab runner](https://colab.research.google.com/github/itsvvy/comp4330-ssd-small-object/blob/main/notebooks/COMP4330_sef_runner.ipynb) |
+| Experiment rationale and findings | [`reports/experiment_history.md`](reports/experiment_history.md) |
+| Final project summary and measured results | [`reports/final_project_summary.md`](reports/final_project_summary.md) |
+| Experiment artifact index | [`reports/README.md`](reports/README.md) |
+| Chronological research log | [Colab experiment record](https://colab.research.google.com/drive/1kTnOphcCSUmjX6UQpEoj4zWjvLR-Fp5R) |
+| Reproducible final workflow | [Final Colab runner](https://colab.research.google.com/github/itsvvy/comp4330-ssd-small-object/blob/main/notebooks/COMP4330_sef_runner.ipynb) |
 
 ## 1. Problem and baseline
 
