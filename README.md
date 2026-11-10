@@ -9,11 +9,11 @@ local-tile detections at inference time.
 
 | Metric | Released SSD300 | Selective Tiled Inference |
 |---|---:|---:|
-| Overall mAP@0.5 | 77.66% | **78.33%** |
-| Small AP@0.5 | 10.78% | **30.65%** |
-| Small recall@0.5 | 77.05% | **90.99%** |
-| Medium AP@0.5 | 63.07% | 60.54% |
-| Large AP@0.5 | 85.97% | 84.97% |
+| Overall mAP at IoU 0.5 | 77.66% | **78.33%** |
+| Small AP at IoU 0.5 | 10.78% | **30.65%** |
+| Small recall at IoU 0.5 | 77.05% | **90.99%** |
+| Medium AP at IoU 0.5 | 63.07% | 60.54% |
+| Large AP at IoU 0.5 | 85.97% | 84.97% |
 | FPS | 19.06 | 5.45 |
 
 The result is measured on the complete 4,952-image VOC2007 test set. The

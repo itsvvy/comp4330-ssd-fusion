@@ -1,7 +1,7 @@
 # Experiment Records
 
 `baseline_m0.json` records the released SSD300 VOC0712 checkpoint on VOC2007
-test. The standard evaluator reproduces 77.66% mAP@0.5, close to the
+test. The standard evaluator reproduces 77.66% mAP at IoU 0.5, close to the
 repository's 77.43% reference. The size-stratified result uses the same saved
 detections after mapping annotations and detections into 300 x 300 input
 space.

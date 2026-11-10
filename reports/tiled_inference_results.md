@@ -9,11 +9,11 @@ evaluation frame. All detections are combined with per-class NMS.
 
 | Metric | SSD300 baseline | Selective tiled | Delta |
 |---|---:|---:|---:|
-| Overall mAP@0.5 | 77.66% | **78.33%** | **+0.67 pp** |
-| Small AP@0.5 | 10.78% | **30.65%** | **+19.87 pp** |
-| Small recall@0.5 | 77.05% | **90.99%** | **+13.94 pp** |
-| Medium AP@0.5 | 63.07% | 60.54% | -2.54 pp |
-| Large AP@0.5 | 85.97% | 84.97% | -1.00 pp |
+| Overall mAP at IoU 0.5 | 77.66% | **78.33%** | **+0.67 pp** |
+| Small AP at IoU 0.5 | 10.78% | **30.65%** | **+19.87 pp** |
+| Small recall at IoU 0.5 | 77.05% | **90.99%** | **+13.94 pp** |
+| Medium AP at IoU 0.5 | 63.07% | 60.54% | -2.54 pp |
+| Large AP at IoU 0.5 | 85.97% | 84.97% | -1.00 pp |
 | FPS | 19.06 | 5.45 | -13.62 |
 | Latency | 52.45 ms | 183.59 ms | +131.14 ms |
 

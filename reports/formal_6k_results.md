@@ -4,7 +4,7 @@ All arms use the same 6,000-iteration budget and seed. The differences below
 are descriptive single-seed course-project results, not evidence of
 statistical significance.
 
-| Arm | Overall mAP@0.5 | Small AP | Medium AP | Large AP | FPS |
+| Arm | Overall mAP at IoU 0.5 | Small AP | Medium AP | Large AP | FPS |
 |---|---:|---:|---:|---:|---:|
 | M0-FT | 0.7726 | 0.1111 | 0.6295 | 0.8590 | 23.56 |
 | C | 0.7727 | 0.1110 | 0.6291 | 0.8587 | 22.83 |
@@ -24,7 +24,7 @@ statistical significance.
 
 ## Interpretation
 
-The released SSD300 baseline reproduces 77.66% overall VOC2007 mAP@0.5 before
+The released SSD300 baseline reproduces 77.66% overall VOC2007 mAP at IoU 0.5 before
 the controlled 6k fine-tuning runs. Fine-tuning M0 for 6k iterations preserves
 overall mAP at 77.26%, so the shared comparison budget is usable.
 
