@@ -89,7 +89,7 @@ def test_fixed_fusion_identity_and_pointwise_gradient():
 
 def test_active_fusion_has_fixed_nonzero_scale():
     model = build_ssd("train", variant="fusion_active")
-    assert model.fusion.scale.item() == 0.05
+    assert model.fusion.scale.item() == pytest.approx(0.05)
     assert not model.fusion.scale.requires_grad
 
 
