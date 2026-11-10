@@ -1,0 +1,76 @@
+{
+  "method": "normalized zero-initialized fusion branch",
+  "purpose": "test whether repairing fusion branch scale and optimization makes M1 useful",
+  "protocol": {
+    "iterations": 6000,
+    "freeze_iterations": 2400,
+    "seed": 1337,
+    "batch_size": 8,
+    "gradient_accumulation": 2,
+    "amp": true,
+    "evaluation_split": "VOC2007 test",
+    "init_checkpoint": "ssd300_mAP_77.43_v2.pth"
+  },
+  "repair": {
+    "branch_normalization": true,
+    "pointwise_zero_initialization": true,
+    "scale_initial": 1.0,
+    "final_scale": 0.9816150665283203
+  },
+  "baseline_m0_ft": {
+    "overall_map_0.5": 0.7725720172749051,
+    "fps": 23.561947452478748,
+    "size_bins": {
+      "small": {
+        "ap": 0.11108531777562503,
+        "recall": 0.7625272331154684
+      },
+      "medium": {
+        "ap": 0.6294735930251288,
+        "recall": 0.9119825708061002
+      },
+      "large": {
+        "ap": 0.8589707225294053,
+        "recall": 0.9643858202802967
+      }
+    }
+  },
+  "m1_gatefix_6k": {
+    "overall_map_0.5": 0.7699227974707552,
+    "latency_ms_mean": 64.65257219043524,
+    "fps": 15.467288711336698,
+    "size_bins": {
+      "small": {
+        "ap": 0.1487858799815964,
+        "recall": 0.8140885984023238
+      },
+      "medium": {
+        "ap": 0.6151780032776467,
+        "recall": 0.9200435729847495
+      },
+      "large": {
+        "ap": 0.8445058662878085,
+        "recall": 0.9686727122835944
+      }
+    }
+  },
+  "deltas_vs_m0_ft": {
+    "overall_map_0.5": -0.0026492198041499,
+    "small_ap": 0.0377005622059714,
+    "small_recall": 0.0515613652868554,
+    "medium_ap": -0.0142955897474821,
+    "large_ap": -0.0144648562415968,
+    "fps": -8.09465874114205
+  },
+  "pilot_500_images": {
+    "baseline_overall_map_0.5": 0.8029467384601151,
+    "gatefix_500_overall_map_0.5": 0.7972243411833707,
+    "baseline_small_ap": 0.14073201917767914,
+    "gatefix_500_small_ap": 0.17029928089387655
+  },
+  "final_branch_check": {
+    "branch_delta_rms": 0.0,
+    "scale_0.5_and_0.75_outputs_identical": true
+  },
+  "decision": "not adopted; selective tiled inference remains the final method"
+}

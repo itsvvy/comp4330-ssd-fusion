@@ -24,6 +24,10 @@ accuracy-first selective tiled inference experiment. It keeps the released
 model weights unchanged and improves full VOC2007 test mAP and small-object AP
 while reducing throughput.
 
+`m1_gatefix_results.json` and `m1_gatefix_results.md` record the normalized
+fusion-branch repair attempt. It improves small-object metrics but loses
+overall accuracy and is not the selected final method.
+
 These files are small summaries. Raw `detections.pkl`, metrics logs, and
 checkpoints remain outside Git and should be stored in Drive or another
 artifact store.
