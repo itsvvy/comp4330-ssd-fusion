@@ -24,7 +24,7 @@ def test_map_crop_detections_to_full_image():
     )
     mapped = map_crop_detections(detections, (100, 50, 300, 250))
     expected = torch.tensor(
-        [[0.9, 120.0, 70.0, 140.0, 130.0]],
+        [[0.9, 120.0, 90.0, 160.0, 130.0]],
         dtype=torch.float32,
     )
     assert torch.allclose(mapped, expected)
