@@ -1,195 +1,184 @@
-# COMP4330 SSD300 Fusion
+# COMP4330: Small-Object Detection on VGG16-SSD300
 
-Course project code for diagnosing and improving small-object detection in
-VGG16-SSD300 with a lightweight top-down feature-fusion branch.
+This repository contains the code and reproducible experiment records for a
+COMP4330 course project on small-object detection with VGG16-SSD300.
 
-The project compares four pre-registered configurations on PASCAL VOC:
+The final selected method is **Selective Tiled Inference**. It keeps the
+released SSD300 VOC0712 checkpoint unchanged and combines full-image and
+local-tile detections at inference time.
 
-| Config | Purpose |
-|---|---|
-| `M0` | Released SSD300 VOC0712 checkpoint |
-| `M0-FT` | Same-budget fine-tuned baseline |
-| `C` | Parameter-matched branch driven only by `conv4_3` |
-| `M1` | `conv7 -> conv4_3` zero-gated top-down fusion |
+| Metric | Released SSD300 | Selective Tiled Inference |
+|---|---:|---:|
+| Overall mAP@0.5 | 77.66% | **78.33%** |
+| Small AP@0.5 | 10.78% | **30.65%** |
+| Small recall@0.5 | 77.05% | **90.99%** |
+| Medium AP@0.5 | 63.07% | 60.54% |
+| Large AP@0.5 | 85.97% | 84.97% |
+| FPS | 19.06 | 5.45 |
 
-The source is based on the MIT-licensed
-[`amdegroot/ssd.pytorch`](https://github.com/amdegroot/ssd.pytorch), pinned at
-upstream commit `5b0b77faa955c1917b0c710d770739ba8fbff9b7`, with compatibility
-updates required by current PyTorch.
+The result is measured on the complete 4,952-image VOC2007 test set. The
+method is accuracy-first: it performs five detector passes per image and is
+not intended as a real-time replacement for single-pass SSD300.
+
+![Final VOC2007 comparison](reports/figures/final_comparison.svg)
+
+## Final method
+
+For each image:
+
+1. Run SSD300 on the full image.
+2. Run SSD300 on four tiles with 20% overlap.
+3. Map tile detections back to full-image coordinates.
+4. Keep only tile detections in the small-object area range.
+5. Merge full-image and tile detections with per-class NMS.
+
+The fixed final parameters are:
+
+- tile grid: `2 x 2`
+- overlap: `0.2`
+- full-image pass: enabled
+- maximum resized tile-detection area: `32 x 32 = 1024`
+- NMS IoU: `0.45`
+- tile score scale: `1.0`
+
+The method changes no model weights. Its main limitation is latency:
+`183.59 ms/image` and `5.45 FPS` on the recorded T4 runtime.
 
 ## Quick start in Colab
 
-1. Open `notebooks/COMP4330_sef_runner.ipynb` in Google Colab.
-2. Select a GPU runtime: **Runtime > Change runtime type > T4 GPU**.
-3. Keep the notebook's project and asset directories in Google Drive.
-4. Run the cells in order. The notebook downloads the repository if it is not
-   already present, prepares VOC0712, checks the checkpoint, and runs a short
-   profiling job before a long training job.
+Open the final notebook:
 
-The DataLoader should read images from `/content/data`, not directly from the
-mounted Drive. Drive is used for source archives, checkpoints, logs, and small
-result files.
+https://colab.research.google.com/github/itsvvy/comp4330-ssd-fusion/blob/main/notebooks/COMP4330_sef_runner.ipynb
 
-The compatibility path has been exercised in Colab with Python 3.13.16,
-PyTorch 2.11.0, CUDA 13.0, and a 15 GB Tesla T4. The tests also run on CPU
-PyTorch for development machines without CUDA.
+Use **Runtime > Change runtime type > T4 GPU**. The notebook:
 
-The first baseline run and training profile are summarized under `reports/`.
-They reproduce 77.66% overall VOC2007 mAP@0.5 and expose a large input-space
-small-object gap; these are preliminary course-project results, not the final
-fusion comparison.
+- clones this repository;
+- installs dependencies;
+- downloads and verifies VOC0712 and the SSD300 checkpoint into ephemeral
+  `/content` storage;
+- runs the tests and a five-image inference smoke check.
 
-## Validated small-object improvement
+The full evaluation is opt-in because it takes about 20 minutes.
 
-Selective tiled inference keeps the released SSD300 weights unchanged, runs
-the full image plus four overlapping tiles, and merges only tile detections in
-the input-space small-object area range. On the complete VOC2007 test set it
-improves:
-
-- overall mAP@0.5: 77.66% to 78.33%
-- small-object AP@0.5: 10.78% to 30.65%
-- small-object recall@0.5: 77.05% to 90.99%
-
-The cost is lower throughput: about 5.45 FPS versus 19.06 FPS for the
-single-pass baseline. See `reports/tiled_inference_results.md`.
+## Reproduce the final result
 
 ```bash
+bash scripts/download_assets.sh \
+  /content/assets \
+  /content/data/VOCdevkit
+
 python tools/tiled_eval.py \
-  --trained_model /path/to/ssd300_mAP_77.43_v2.pth \
+  --trained_model /content/assets/weights/ssd300_mAP_77.43_v2.pth \
   --voc_root /content/data/VOCdevkit \
-  --save_folder /path/to/tiled_eval \
+  --save_folder /content/results/full_tiled_small \
   --variant baseline \
   --tile_grid 2 \
   --overlap 0.2 \
   --include_full \
   --tile_max_area 1024
-```
 
-## Local setup
-
-On Windows, use WSL2 Ubuntu 22.04. Keep the repository and environments in the
-Linux filesystem, for example `~/work/comp4330-ssd-fusion`. The Windows NVIDIA
-driver provides CUDA to WSL; do not install another Linux display driver.
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-# Install the PyTorch build recommended by pytorch.org for the local CUDA.
-python -m pip install torch torchvision
-python -m pip install -r requirements.txt
-pytest -q
-```
-
-For the 4 GB RTX 3050, start with batch size 2 and gradient accumulation 4.
-Fall back to batch size 1 and accumulation 8 if an epoch does not fit.
-
-## Assets
-
-```bash
-bash scripts/download_assets.sh \
-  /path/to/persistent/assets \
-  /content/data/VOCdevkit
-```
-
-The script fetches VOC2007 trainval/test, VOC2012 trainval, the released SSD300
-checkpoint, and the reduced VGG16 base. It writes `SHA256SUMS.json` on the first
-complete run and rejects changed or truncated files on later runs.
-
-Expected locations:
-
-```text
-assets/VOCtrainval_06-Nov-2007.tar
-assets/VOCtest_06-Nov-2007.tar
-assets/VOCtrainval_11-May-2012.tar
-assets/weights/ssd300_mAP_77.43_v2.pth
-assets/weights/vgg16_reducedfc.pth
-VOCdevkit/VOC2007
-VOCdevkit/VOC2012
-```
-
-## Training
-
-Experiment settings live in `configs/`. All formal arms use the same iteration
-budget, augmentation, optimizer schedule, and evaluation code.
-
-The current course-project protocol uses 6,000 optimizer iterations: the VGG16
-backbone is frozen for the first 2,400 iterations, then unfrozen for the
-remaining 3,600. This preserves the intended two-stage schedule while reducing
-the estimated Colab cost of three arms to roughly 1.5-2 GPU hours.
-
-```bash
-python scripts/run_experiment.py --config configs/m1_fusion.yaml
-```
-
-Resume from the latest complete checkpoint:
-
-```bash
-python scripts/run_experiment.py \
-  --config configs/m1_fusion.yaml \
-  --resume /path/to/last.pt
-```
-
-Checkpoints contain the model, optimizer, iteration, AMP scaler, seed, RNG
-state, and every schedule argument needed to reconstruct the learning rate.
-A resumed Colab session should lose at most the interval since the latest
-checkpoint.
-
-## Evaluation
-
-Overall mAP follows the repository's VOC2007 11-point AP convention. The
-size-stratified result is a separate SSD-input-space metric using areas after
-resizing to 300 x 300:
-
-- small: `< 32^2`
-- medium: `32^2 <= area < 96^2`
-- large: `>= 96^2`
-
-The primary size result is class-aware pooled AP; per-class AP and macro mAP
-are reported as secondary results. VOC2007 test must not be used to tune the
-model or select an iteration.
-
-Save all VOC2007 detections:
-
-```bash
-python eval.py \
-  --trained_model /path/to/ssd300_mAP_77.43_v2.pth \
-  --voc_root /content/data/VOCdevkit \
-  --save_folder /path/to/run/eval \
-  --variant baseline
-```
-
-Then compute overall and size-stratified metrics:
-
-```bash
 python tools/size_stratified_eval.py \
-  --detections /path/to/run/eval/detections.pkl \
+  --detections /content/results/full_tiled_small/detections.pkl \
   --voc-root /content/data/VOCdevkit \
-  --output /path/to/run/eval/metrics.json
+  --output /content/results/full_tiled_small/size_metrics.json
 ```
 
-Use `--limit 5` on `eval.py` for a quick end-to-end smoke test. Do not use a
-limited result as a project metric.
+For a fast check, add `--limit 5` to both inference and size evaluation. Do
+not use the limited result as a project metric.
+
+The recorded result and all parameters are in
+[`reports/tiled_inference_results.md`](reports/tiled_inference_results.md) and
+[`reports/tiled_inference_results.json`](reports/tiled_inference_results.json).
+
+## Fusion study
+
+The project also includes the original controlled `M0-FT`, `C`, and `M1`
+comparison from the proposal:
+
+| Arm | Purpose |
+|---|---|
+| `M0-FT` | Same-budget fine-tuned baseline |
+| `C` | Parameter-matched control without cross-scale input |
+| `M1` | `conv7 -> conv4_3` zero-gated fusion |
+
+All three use 6,000 iterations, the same optimizer schedule, and seed `1337`.
+The formal result is in
+[`reports/formal_6k_results.md`](reports/formal_6k_results.md).
+
+The fusion result was effectively neutral. Gate diagnostics in
+[`reports/fusion_gate_validation.md`](reports/fusion_gate_validation.md)
+explain why the original branch had little effect. Follow-up fusion structures
+were screened and rejected without changing the final tiled result.
+
+## Environment and assets
+
+The recorded GPU runs used:
+
+- Google Colab Tesla T4, 14.6 GiB VRAM
+- Python `3.13.16`
+- PyTorch `2.11.0+cu130`
+- CUDA `13.0`
+
+The asset script downloads:
+
+- VOC2007 trainval/test
+- VOC2012 trainval
+- `ssd300_mAP_77.43_v2.pth`
+- `vgg16_reducedfc.pth`
+
+`scripts/download_assets.sh` writes and verifies `SHA256SUMS.json`. Dataset
+files and checkpoints are intentionally excluded from Git.
+
+## Tests
+
+The code has CPU tests for model shapes, zero-gate behavior, checkpoint
+loading, VOC size binning, result aggregation, tile coordinate mapping, and
+tile merging.
+
+```bash
+python -m pytest -q
+```
+
+The full suite was last verified on the frozen final code path before the
+release tag.
 
 ## Repository layout
 
 ```text
-configs/       experiment definitions
-data/          VOC and COCO loaders from upstream
-layers/        SSD losses and box utilities
-notebooks/     Colab runner
-scripts/       asset, training, and evaluation entry points
-tests/         CPU tests and synthetic evaluator checks
+configs/       pre-registered training configurations
+data/          VOC/COCO loaders from the upstream project
+layers/        SSD losses, priors, decoding, and detection
+notebooks/     final Colab runner
+reports/       frozen metrics, diagnostics, and final summary
+scripts/       asset, training, and result-summary entry points
+tests/         CPU and synthetic evaluation tests
+tools/         size-stratified and tiled evaluation
 ```
 
-## Compute
+## Branches and experiment history
 
-Use Colab Pro/T4 for the formal `M0-FT`, `C`, and `M1` runs, with checkpoints
-written every 500-1000 iterations. The local 4 GB GPU is appropriate for
-baseline evaluation, demo inference, and short compatibility tests. Avoid
-making it the critical path for three long training runs.
+`main` contains the validated final method and the formal fusion comparison.
+Experimental work remains on independent branches:
 
-## Upstream license
+- `experiment/tiled-small-objects`: final selective tiled inference
+- `experiment/m0-ft-6k`, `experiment/control-6k`,
+  `experiment/m1-fusion-6k`: formal three-arm comparison
+- `experiment/m1-gatefix`: fusion gate diagnostics and repair attempts
+- `experiment/multiscale-fusion`: rejected multiscale residual fusion screen
+- `experiment/highres-small-head`: rejected 75x75 auxiliary-head screen
 
-The upstream code is distributed under the MIT license in `LICENSE`. The
-project modifications retain that license.
+No pushed branch is rewritten or deleted. The final frozen state is identified
+by the `course-final-v1.0.0` tag.
+
+## Limitations
+
+- Selective tiled inference reduces throughput by about 3.5 times.
+- Medium and large AP decrease slightly.
+- Fusion experiments use one seed.
+- FPS is a Colab measurement and should not be treated as a hardware benchmark.
+- Raw checkpoints and detections are not stored in Git; they can be regenerated
+  with the pinned assets and commands above.
+
+The source is based on the MIT-licensed
+[`amdegroot/ssd.pytorch`](https://github.com/amdegroot/ssd.pytorch), pinned at
+commit `5b0b77faa955c1917b0c710d770739ba8fbff9b7`. The MIT license is retained.
