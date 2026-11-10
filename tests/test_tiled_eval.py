@@ -1,6 +1,7 @@
 import torch
 
 from tools.tiled_eval import (
+    filter_by_resized_area,
     map_crop_detections,
     merge_class_detections,
     tile_regions,
@@ -48,3 +49,17 @@ def test_merge_class_detections_suppresses_duplicate():
         merged[0],
         torch.tensor([10.0, 10.0, 50.0, 50.0, 0.9]),
     )
+
+
+def test_filter_by_resized_area_uses_300_input_space():
+    detections = torch.tensor(
+        [
+            [0.9, 10.0, 10.0, 30.0, 30.0],
+            [0.8, 10.0, 10.0, 70.0, 70.0],
+        ]
+    )
+    filtered = filter_by_resized_area(
+        detections, width=300, height=300, max_area=32**2
+    )
+    assert filtered.shape == (1, 5)
+    assert torch.equal(filtered[0], detections[0])

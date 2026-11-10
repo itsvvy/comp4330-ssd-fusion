@@ -42,6 +42,8 @@ def parse_args():
     parser.add_argument("--tile_grid", type=int, default=2)
     parser.add_argument("--overlap", type=float, default=0.2)
     parser.add_argument("--include_full", action="store_true")
+    parser.add_argument("--tile_max_area", type=float, default=0.0)
+    parser.add_argument("--tile_score_scale", type=float, default=1.0)
     parser.add_argument("--confidence_threshold", type=float, default=0.01)
     parser.add_argument("--nms_threshold", type=float, default=0.45)
     parser.add_argument("--limit", type=int, default=0)
@@ -85,6 +87,16 @@ def map_crop_detections(detections, region):
     mapped[:, 2] = detections[:, 2] * (bottom - top) + top
     mapped[:, 4] = detections[:, 4] * (bottom - top) + top
     return mapped
+
+
+def filter_by_resized_area(detections, width, height, max_area):
+    if not max_area or not detections.numel():
+        return detections
+    scale_x = 300.0 / width
+    scale_y = 300.0 / height
+    box_width = (detections[:, 3] - detections[:, 1]) * scale_x
+    box_height = (detections[:, 4] - detections[:, 2]) * scale_y
+    return detections[box_width * box_height <= max_area]
 
 
 def merge_class_detections(detections, nms_threshold, top_k=200):
@@ -139,7 +151,7 @@ def main():
 
         started = time.perf_counter()
         per_class = [[] for _ in range(21)]
-        for left, top, right, bottom in regions:
+        for region_index, (left, top, right, bottom) in enumerate(regions):
             crop = image[top:bottom, left:right]
             tensor = resize_for_ssd(crop).to(device)
             with torch.inference_mode():
@@ -152,12 +164,20 @@ def main():
                 )
                 class_detections = class_detections[keep]
                 if class_detections.numel():
-                    per_class[class_index].append(
-                        map_crop_detections(
-                            class_detections,
-                            (left, top, right, bottom),
-                        )
+                    mapped = map_crop_detections(
+                        class_detections,
+                        (left, top, right, bottom),
                     )
+                    is_full = args.include_full and region_index == 0
+                    if not is_full:
+                        mapped = filter_by_resized_area(
+                            mapped,
+                            width,
+                            height,
+                            args.tile_max_area,
+                        )
+                        mapped[:, 0] *= args.tile_score_scale
+                    per_class[class_index].append(mapped)
 
         for class_index in range(1, 21):
             all_detections[class_index][index] = (
@@ -186,6 +206,8 @@ def main():
     metrics["tile_grid"] = args.tile_grid
     metrics["tile_overlap"] = args.overlap
     metrics["include_full"] = args.include_full
+    metrics["tile_max_area"] = args.tile_max_area
+    metrics["tile_score_scale"] = args.tile_score_scale
     (save_folder / "metrics.json").write_text(
         json.dumps(metrics, indent=2) + "\n", encoding="utf-8"
     )
