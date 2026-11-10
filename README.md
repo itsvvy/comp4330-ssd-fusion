@@ -22,6 +22,9 @@ not intended as a real-time replacement for single-pass SSD300.
 
 ![Experiment overview](reports/figures/experiment_overview.png)
 
+The overview figure is generated from the frozen experiment JSON by
+[`scripts/plot_results.py`](scripts/plot_results.py) using Matplotlib.
+
 ## Project investigation
 
 The project began with the hypothesis that VGG16-SSD300's small-object weakness
@@ -101,6 +104,14 @@ Use **Runtime > Change runtime type > T4 GPU**. The notebook:
 - runs the tests and a five-image inference smoke check.
 
 The full evaluation is opt-in because it takes about 20 minutes.
+
+To regenerate the figures directly from the frozen JSON:
+
+```bash
+python scripts/plot_results.py \
+  --history reports/experiment_history.json \
+  --output-dir reports/figures
+```
 
 ## Reproduce the final result
 

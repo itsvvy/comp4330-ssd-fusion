@@ -121,7 +121,7 @@ def main():
     axes[1].set_ylabel("Percent")
     axes[1].set_title("B. Fusion experiments - full 6k test")
     axes[1].tick_params(axis="x", rotation=18)
-    axes[1].legend(frameon=False, loc="upper right")
+    axes[1].legend(frameon=False, loc="upper center", ncol=2)
 
     screen_labels = ["Baseline", "Multiscale", "High-res head"]
     screen_items = [
