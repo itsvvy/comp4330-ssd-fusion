@@ -66,6 +66,10 @@ that directly enlarged small objects.
 
 The consolidated metrics and narrative are in
 [`reports/experiment_history.md`](reports/experiment_history.md).
+The chronological Colab experiment log, including the original run cells and
+outputs, is retained at
+[COMP4330_sef_runner.ipynb](https://colab.research.google.com/drive/1kTnOphcCSUmjX6UQpEoj4zWjvLR-Fp5R).
+The GitHub-linked notebook in Quick start is the cleaned executable runner.
 
 ## Final method
 
@@ -221,7 +225,7 @@ Experimental work remains on independent branches:
 - `experiment/highres-small-head`: rejected 75x75 auxiliary-head screen
 
 No pushed branch is rewritten or deleted. The current frozen state is identified
-by the `course-final-v1.0.3` tag.
+by the `course-final-v1.0.4` tag.
 
 ## Limitations
 
